@@ -5,6 +5,8 @@
 
 ---
 
+> 실제 배포 순서는 [DEPLOY.md](DEPLOY.md) 를 따르세요. 아래는 참고용 상세 설명입니다.
+
 ## 1. DB (셀프호스팅 Supabase)
 
 기존 `haedong-web`과 **분리된 새 Supabase 인스턴스**를 권장합니다 (권한·백업·장애 범위 분리).

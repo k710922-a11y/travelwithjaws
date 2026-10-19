@@ -1,4 +1,4 @@
-# Travel.with.Jaws — 착수 키트 v0.3
+# Travel.with.Jaws
 
 서비스 주소: https://travel.jawsweb.site · 바다에서 도시까지, 확인하고 떠나는 여행
 
@@ -12,20 +12,26 @@ travelwithjaws/
 │  ├─ migrations/002_access.sql   익명 사용자는 '공개 뷰'만 읽고 이벤트만 기록
 │  ├─ migrations/003_portal.sql   미니 포털: 매체 출처·콘텐츠·컬렉션, 요약·썸네일 권리 규칙, 공개 피드
 │  ├─ migrations/004_longform.sql 롱폼 = 쇼츠 묶음: 묶음 태그, 후보 자동 판정, 승인 차단, 권리 재확인
-│  ├─ seed/test_rules.sql         제작·공개 차단 규칙 검증 (21건)
-│  ├─ seed/test_portal.sql        포털 규칙 검증 (12건, test_rules 다음에 실행)
-│  └─ seed/test_longform.sql      롱폼 묶음 기준 검증 (11건, 빈 DB에서 단독 실행)
+│  ├─ migrations/005_console.sql  편집 콘솔 뷰·행동 함수·행동 기록
+│  ├─ seed/test_*.sql             규칙 시험 53건 (run_tests.sh 로 실행)
+│  ├─ run_tests.sh                시험용 DB를 만들어 전체 시험
+│  ├─ migrate.sh                  운영 DB에 새 마이그레이션만 적용 (변조 감지)
+│  └─ add_staff.sh                운영자 등록 + 콘솔 로그인 줄 생성
 ├─ pipeline/
 │  ├─ render_short.py             승인 자산 → 1080×1920 쇼츠 후보 + 자막 + 품질검사
 │  └─ samples/                    예시 이미지·작업 매니페스트 (실제 숙소 아님)
 ├─ hub/                           Next.js 웹허브 — 홈은 미니 포털, /p/[작업번호]는 판단 문서 (Coolify용 Dockerfile 포함)
 │  ├─ components/heroScene.js    해변·현수교·도시 스카이라인이 움직이는 히어로 장면 (캔버스, 이미지 파일 없음)
 │  ├─ components/portal.js       포털 화면 로직 (매체 탭·바다↔도시 다이얼·컬렉션·테마·상세 시트)
+│  ├─ app/console/               편집 콘솔 (로그인 필요): 작업 현황·피드 승인·롱폼·정정 요청
 │  └─ app/portal.css             포털 디자인 토큰 (라이트·다크)
+├─ deploy/minipc/                미니PC에서 실행: setup-db.sh, add-staff.sh
+├─ .github/workflows/ci.yml      푸시마다 DB 규칙·합성기·허브 빌드 시험
 ├─ integrations/youtube/
 │  └─ publish.py                  YouTube 공식 업로드: 쇼츠(upload/verify), 롱폼(longform) — 모두 비공개 → 사람 확인 → 공개
 └─ docs/
-   ├─ SETUP.md                    미니PC 배포·유튜브 연동 단계별 가이드
+   ├─ DEPLOY.md                   미니PC 배포 순서 (Coolify · Supabase · Cloudflare)
+   ├─ SETUP.md                    유튜브 연동 등 상세 설명
    └─ CHECKLIST.md                대표님이 직접 해야 하는 일 / 착수 승인 체크리스트
 ```
 
@@ -62,7 +68,7 @@ cd pipeline && python render_short.py samples/job_TRP-00001.json --out renders
 - **인스타그램 연동**: 전문계정이 아직 없어 코드는 만들지 않았습니다. `docs/CHECKLIST.md`의 개설 순서를 먼저 진행해 주세요.
 - **자동 공개**: 업로드는 항상 비공개. 공개 전환은 `publish.py verify`로 사람이 확인한 뒤에만.
 - **의료·여행상품 판매·다국어 확장**: 계획서 34·44·48쪽에 따라 별도 검토 전 비활성.
-- 자산 등록·검수 화면(관리자 UI)은 다음 단계. 지금은 Supabase Studio에서 직접 입력합니다.
+- 자산·근거·작업 **입력** 화면은 다음 단계. 지금은 Supabase Studio에서 입력하고, 상태 변경·승인·정정 처리는 편집 콘솔(/console)에서 합니다.
 
 ## 미니 포털 (v0.2)
 
