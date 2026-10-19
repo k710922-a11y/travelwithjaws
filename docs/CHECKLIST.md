@@ -7,7 +7,7 @@
 | 1 | 서비스명 **Travel.with.Jaws** 확정 → 유튜브 채널명 변경 또는 새 브랜드 채널 개설, 핸들 @travel.with.jaws 확인 | 30분 | 핸들이 이미 쓰이면 @travelwithjaws 등 대안 |
 | 2 | Google Cloud 프로젝트 + YouTube Data API v3 + OAuth 클라이언트 (SETUP 4-1) | 20분 | 동의 화면 '테스트 사용자'에 본인 추가 |
 | 3 | `publish.py auth` 로 채널 계정 직접 로그인·동의 | 5분 | |
-| 4 | GitHub 비공개 저장소 `travel-with-jaws` 생성 → 이 폴더 업로드 | 10분 | 원하시면 제가 커밋까지 준비 |
+| 4 | GitHub 비공개 저장소 `travelwithjaws` 생성 → 이 폴더 업로드 | 10분 | 원하시면 제가 커밋까지 준비 |
 | 5 | Coolify에 Supabase·허브 배포 (SETUP 1~2) | 40분 | 설치 스크립트로 드릴 수 있음 |
 | 6 | 인스타그램: 브랜드 계정 개설 → **전문계정(비즈니스/크리에이터)** 전환 → 페이스북 페이지 연결 | 20분 | 이후 Meta 앱·웹훅은 제가 준비 |
 

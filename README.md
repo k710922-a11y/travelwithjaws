@@ -6,7 +6,7 @@
 원칙은 계획서와 같습니다: *권리·근거·승인 기록이 없으면 공개되지 않는다.*
 
 ```
-travel-with-jaws/
+travelwithjaws/
 ├─ db/
 │  ├─ migrations/001_core.sql     장소·자산(권리)·근거·주장·작업·버전·공개이력·정정 + 상태전이 트리거
 │  ├─ migrations/002_access.sql   익명 사용자는 '공개 뷰'만 읽고 이벤트만 기록

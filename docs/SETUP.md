@@ -22,7 +22,7 @@
 
 ## 2. 웹허브
 
-1. 이 폴더를 GitHub `k710922-a11y/travel-with-jaws` (비공개) 로 올립니다.
+1. 이 폴더를 GitHub `k710922-a11y/travelwithjaws` (비공개) 로 올립니다.
 2. Coolify → New Resource → Application → GitHub → `trip-hub`
    - Base Directory: `/hub` · Build Pack: **Dockerfile** · Port: `3000`
    - 도메인: `travel.jawsweb.site`
