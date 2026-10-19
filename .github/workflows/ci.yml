@@ -1,0 +1,65 @@
+name: 시험
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  db-rules:
+    name: DB 규칙 44건
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: psql 설치
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+      - name: 규칙 시험
+        env:
+          PGURL: postgresql://postgres:postgres@localhost:5432
+        run: ./db/run_tests.sh
+
+  pipeline:
+    name: 쇼츠 합성기
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: ffmpeg·한글 글꼴 설치
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
+      - name: 권리 미확인 자산이면 합성 거부 (exit 2)
+        run: |
+          python - <<'PY'
+          import json; j = json.load(open("pipeline/samples/job_TRP-00001.json"))
+          j["rights"][1]["rights_status"] = "unverified"
+          json.dump(j, open("pipeline/samples/_blocked.json", "w"), ensure_ascii=False)
+          PY
+          set +e; python pipeline/render_short.py pipeline/samples/_blocked.json --out /tmp/r --tts none; code=$?; set -e
+          test "$code" -eq 2
+      - name: 승인 자산으로 시험 합성 + 품질검사
+        run: python pipeline/render_short.py pipeline/samples/job_TRP-00001.json --out /tmp/renders --tts none
+
+  hub:
+    name: 웹허브 빌드
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: hub
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: hub/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
