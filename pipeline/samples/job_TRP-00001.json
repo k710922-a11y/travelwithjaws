@@ -1,0 +1,51 @@
+{
+  "job_no": "TRP-00001",
+  "version": 1,
+  "lang": "ko",
+  "segment": "domestic_kr",
+  "question": "아이 둘과 묵을 때 이 객실 침구로 충분할까?",
+  "hub_url": "https://travel.jawsweb.site/p/TRP-00001",
+  "sponsored": true,
+  "disclosure": "자료 제공: 숙소 측 · 평가는 편집팀 판단",
+  "scenes": [
+    {
+      "role": "question",
+      "asset_id": "20000000-0000-0000-0000-000000000001",
+      "image": "s1.jpg",
+      "caption": "아이 둘 가족, 이 객실 침구로 충분할까?",
+      "narration": "아이 둘과 함께라면, 이 객실 침구로 충분할까요?"
+    },
+    {
+      "role": "evidence",
+      "asset_id": "20000000-0000-0000-0000-000000000003",
+      "image": "s2.jpg",
+      "caption": "공식 안내: 더블 1개 + 싱글 2개",
+      "narration": "숙소 공식 안내에는 더블 침대 하나와 싱글 침대 두 개로 나와 있습니다.",
+      "claim_ids": ["40000000-0000-0000-0000-000000000001"],
+      "source_label": "출처: 숙소 공식 안내 (2026.10 확인)"
+    },
+    {
+      "role": "evidence",
+      "asset_id": "20000000-0000-0000-0000-000000000004",
+      "image": "s3.jpg",
+      "caption": "수영장 이용 포함 여부는 아직 미확인",
+      "narration": "다만 실내 수영장 이용이 요금에 포함되는지는 아직 확인되지 않았어요.",
+      "claim_ids": ["40000000-0000-0000-0000-000000000002"],
+      "source_label": "미확인 항목 · 예약 전 숙소에 문의"
+    },
+    {
+      "role": "cta",
+      "asset_id": "20000000-0000-0000-0000-000000000005",
+      "image": "s4.jpg",
+      "caption": "후기 원문과 준비카드는 프로필 링크에서",
+      "narration": "후기 원문 구간과 체크인 준비카드는 프로필 링크에서 확인하세요."
+    }
+  ],
+  "rights": [
+    {"asset_id": "20000000-0000-0000-0000-000000000001", "rights_status": "approved", "allowed_media": ["youtube", "hub"], "allow_edit": true},
+    {"asset_id": "20000000-0000-0000-0000-000000000003", "rights_status": "approved", "allowed_media": ["youtube", "hub"], "allow_edit": false},
+    {"asset_id": "20000000-0000-0000-0000-000000000004", "rights_status": "approved", "allowed_media": ["youtube", "hub"], "allow_edit": true},
+    {"asset_id": "20000000-0000-0000-0000-000000000005", "rights_status": "approved", "allowed_media": ["youtube", "hub"], "allow_edit": false}
+  ],
+  "_note": "예시 데이터. 실제 숙소·제휴가 아닙니다."
+}

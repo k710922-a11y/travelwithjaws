@@ -1,0 +1,39 @@
+{
+  "_note": "데모 데이터. 모든 크리에이터·숙소·공지는 예시이며 실제와 무관합니다.",
+  "items": [
+    { "id": "m01", "platform": "yt_shorts", "creator": "@예시_바다산책", "title": "광안리 해변, 다리가 한 화면에 다 들어오는 자리", "published": "2026-10-18", "duration": "0:34", "place": "광안리 해변", "region": "부산 수영구", "theme": "couple_midlife", "segment": "domestic_kr", "seaCity": -10, "with": ["couple", "friends"], "summary": "해변 중앙보다 남쪽 끝 쪽에서 다리 전체가 한 화면에 들어온다는 촬영자의 관찰입니다. 주말 저녁에는 자리가 빨리 찬다고 말합니다.", "evidence": "review", "sponsored": false, "url": "https://example.com/" },
+    { "id": "m02", "platform": "ig_reels", "creator": "@예시_도시여행자", "title": "해변열차 바다 쪽 창가, 어느 방향에서 타야 할까", "published": "2026-10-18", "duration": "0:21", "place": "해운대 해변열차", "region": "부산 해운대구", "theme": "family", "segment": "domestic_kr", "seaCity": -35, "with": ["family", "couple"], "summary": "진행 방향에 따라 바다 쪽 좌석이 바뀐다는 크리에이터 설명입니다. 좌석 지정 방식은 공식 안내에서 다시 확인해야 합니다.", "evidence": "review", "sponsored": false, "url": "https://example.com/" },
+    { "id": "m03", "platform": "blog", "creator": "주말엔 바다 (예시 블로그)", "title": "아이와 해변 카페거리 걷기, 유모차로 괜찮았을까", "published": "2026-10-17", "duration": "6분 읽기", "place": "안목해변 카페거리", "region": "강원 강릉", "theme": "family", "segment": "domestic_kr", "seaCity": -60, "with": ["family"], "summary": "유모차로는 해변 산책로 쪽이 수월했고, 카페 계단은 건물마다 달랐다는 경험입니다. 주차는 평일 오전이 여유로웠다고 적었습니다.", "evidence": "review", "sponsored": false, "url": "https://example.com/" },
+    { "id": "m04", "platform": "official", "creator": "예시 관광 안내", "title": "해수욕장 운영 기간 이후 입수 통제 구역 안내", "published": "2026-10-16", "duration": "공지", "place": "부산 해수욕장 일대", "region": "부산", "theme": "nature", "segment": "domestic_kr", "seaCity": -85, "with": ["family", "couple", "friends", "solo"], "summary": "운영 기간이 끝난 뒤 입수가 제한되는 구역과 안전요원 배치 여부를 안내하는 공지입니다. 세부 구역은 원문 공지를 확인하세요.", "evidence": "official", "sponsored": false, "url": "https://example.com/" },
+    { "id": "m05", "platform": "yt_shorts", "creator": "@예시_서울야경", "title": "한강 노을에서 야경까지, 한 번에 이어지는 동선", "published": "2026-10-17", "duration": "0:42", "place": "망원한강공원", "region": "서울 마포구", "theme": "youth_mood", "segment": "domestic_kr", "seaCity": 70, "with": ["couple", "friends"], "summary": null, "summaryReason": "자막을 제공받지 않아 요약하지 않았습니다. 원본에서 확인해 주세요.", "evidence": "none", "sponsored": false, "url": "https://example.com/" },
+    { "id": "m06", "platform": "hub_doc", "creator": "편집팀 판단 문서", "title": "아이 둘과 묵을 때 이 객실 침구로 충분할까?", "published": "2026-10-18", "duration": "판단 문서", "place": "[예시] 가족형 리조트 A", "region": "강원", "theme": "family", "segment": "domestic_kr", "seaCity": -40, "with": ["family"], "summary": "공식 안내의 침구 구성과 두 방문자의 경험을 객실 유형별로 나눴습니다. 수영장 포함 여부는 아직 미확인입니다.", "evidence": "official", "sponsored": true, "disclosure": "자료 제공: 숙소 측", "job": "TRP-00001", "ledger": [1, 2, 1, 1], "url": "#" },
+    { "id": "m07", "platform": "ig_reels", "creator": "@예시_제주바람", "title": "동쪽 해안도로에 비가 오면, 이렇게 바꿨어요", "published": "2026-10-16", "duration": "0:28", "place": "제주 동부 해안도로", "region": "제주", "theme": "nature", "segment": "domestic_kr", "seaCity": -70, "with": ["solo", "couple"], "summary": "비가 오자 해안 카페 대신 실내 전시로 일정을 옮긴 경험입니다. 이동 시간은 차량 기준으로 말합니다.", "evidence": "review", "sponsored": true, "disclosure": "자료 제공: 예시 카페", "url": "https://example.com/" },
+    { "id": "m08", "platform": "yt", "creator": "@예시_트래블로그", "title": "1박이라면 해변 숙소일까 시내 숙소일까, 둘 다 묵어 봤습니다", "published": "2026-10-15", "duration": "12:40", "place": "속초 해변·시내", "region": "강원 속초", "theme": "value", "segment": "domestic_kr", "seaCity": 0, "with": ["friends", "couple"], "summary": "해변 숙소는 아침 산책, 시내 숙소는 시장과 터미널 접근이 장점이었다는 비교입니다. 두 곳 모두 직접 묵은 경험입니다.", "evidence": "review", "sponsored": false, "url": "https://example.com/" },
+    { "id": "m09", "platform": "hub_doc", "creator": "편집팀 판단 문서", "title": "한옥 숙소에 처음 묵을 때, 도착 전에 무엇을 확인해야 할까?", "published": "2026-10-17", "duration": "판단 문서", "place": "[예시] 한옥 게스트하우스 B", "region": "서울 종로구", "theme": "hanok_kculture", "segment": "inbound", "seaCity": 85, "with": ["family", "couple", "solo"], "summary": "출입 방식, 짐 이동, 바닥 침구를 도착 순서대로 정리했습니다. 영문 표기는 현지 안내판과 대조했습니다.", "evidence": "official", "sponsored": false, "job": "TRP-00002", "ledger": [1, 1, 1, 1], "url": "#" },
+    { "id": "m10", "platform": "blog", "creator": "도시산책 노트 (예시 블로그)", "title": "호수공원 수상택시, 바람 부는 날에도 탈 수 있었을까", "published": "2026-10-14", "duration": "5분 읽기", "place": "송도 센트럴파크", "region": "인천 연수구", "theme": "family", "segment": "domestic_kr", "seaCity": 55, "with": ["family"], "summary": "바람이 강한 날 운항이 멈췄던 경험과, 출발 전에 운항 안내를 확인한 방법을 적었습니다.", "evidence": "review", "sponsored": false, "url": "https://example.com/" },
+    { "id": "m11", "platform": "yt_shorts", "creator": "@예시_골목여행", "title": "바다 절벽 위 골목길, 계단은 얼마나 될까", "published": "2026-10-15", "duration": "0:31", "place": "영도 흰여울길", "region": "부산 영도구", "theme": "couple_midlife", "segment": "domestic_kr", "seaCity": -20, "with": ["couple", "solo"], "summary": "골목 입구마다 계단 수가 다르고, 해안 산책로로 내려가면 다시 올라와야 한다는 설명입니다. 걷기 편한 신발을 권합니다.", "evidence": "review", "sponsored": false, "url": "https://example.com/" },
+    { "id": "m12", "platform": "official", "creator": "예시 축제 사무국", "title": "강변 가을 축제 일정과 교통 통제 안내", "published": "2026-10-14", "duration": "공지", "place": "여의도 한강공원", "region": "서울 영등포구", "theme": "night_food", "segment": "inbound", "seaCity": 75, "with": ["friends", "couple", "family"], "summary": "축제 기간의 행사 시간과 주변 도로 통제 구간을 알리는 공지입니다. 막차 시간 변경 여부는 원문을 확인하세요.", "evidence": "official", "sponsored": false, "url": "https://example.com/" },
+    { "id": "m13", "platform": "ig_reels", "creator": "@Example_SeoulBites", "title": "Night market food in Seoul, how ordering works", "published": "2026-10-13", "duration": "0:26", "place": "광장시장", "region": "서울 종로구", "theme": "night_food", "segment": "inbound", "seaCity": 90, "with": ["friends", "solo"], "summary": "자리에 앉아 메뉴를 가리켜 주문하고 나갈 때 계산했다는 외국인 방문자의 경험입니다. 현금·카드 가능 여부는 가게마다 다르다고 합니다.", "evidence": "review", "sponsored": false, "url": "https://example.com/" },
+    { "id": "m14", "platform": "yt_shorts", "creator": "@예시_가족캠핑", "title": "해변 캠핑장, 아이 셋이면 사이트 크기는?", "published": "2026-10-12", "duration": "0:38", "place": "예시 해변 캠핑장", "region": "충남 태안", "theme": "big_family", "segment": "domestic_kr", "seaCity": -75, "with": ["family"], "summary": "텐트와 타프를 함께 치려면 큰 사이트가 필요했다는 경험입니다. 사이트 규격은 캠핑장 공지로 확인해야 합니다.", "evidence": "review", "sponsored": false, "url": "https://example.com/" }
+  ],
+  "collections": [
+    { "id": "c1", "title": "바다에서 시작해 야경으로 끝나는 부산 48시간", "sub": "해변 산책, 해안 골목, 다리 야경까지 이어지는 이야기", "mood": "mix", "items": ["m01", "m02", "m11", "m04"] },
+    { "id": "c2", "title": "아이와 바다, 비 오는 날의 대안까지", "sub": "가족 여행자가 실제로 막혔던 지점을 모았습니다", "mood": "sea", "items": ["m03", "m07", "m06", "m14", "m10"] },
+    { "id": "c3", "title": "First time in Korea: 한옥에서 한강까지", "sub": "도착 준비부터 밤 산책까지, 방한 여행자를 위한 모음", "mood": "city", "items": ["m09", "m13", "m12", "m05"] },
+    { "id": "c4", "title": "해변 숙소냐 시내 숙소냐", "sub": "같은 도시에서 둘 다 묵어 본 사람들의 비교", "mood": "mix", "items": ["m08", "m01", "m10"] }
+  ],
+  "themes": [
+    { "key": "youth_mood", "label": "청년 감성", "segment": "국내" },
+    { "key": "value", "label": "가성비", "segment": "국내" },
+    { "key": "worth", "label": "가심비", "segment": "국내" },
+    { "key": "premium", "label": "고급형", "segment": "국내" },
+    { "key": "couple_midlife", "label": "중년부부", "segment": "국내" },
+    { "key": "family", "label": "가족", "segment": "국내" },
+    { "key": "big_family", "label": "대가족", "segment": "국내" },
+    { "key": "nature", "label": "자연·해변", "segment": "국내" },
+    { "key": "hanok_kculture", "label": "한옥·한류", "segment": "방한" },
+    { "key": "tech_korea", "label": "첨단한국", "segment": "방한" },
+    { "key": "night_food", "label": "야간·미식", "segment": "방한" },
+    { "key": "beauty", "label": "뷰티 (의료 제외)", "segment": "방한" }
+  ]
+}

@@ -1,0 +1,11 @@
+node_modules/
+.next/
+.env
+.env.local
+*.tsbuildinfo
+**/token.json
+**/client_secret*.json
+pipeline/renders/
+__pycache__/
+.DS_Store
+Thumbs.db
