@@ -58,6 +58,42 @@ api() {
 jget() { python3 -c "import json,sys; d=json.loads(sys.argv[1] or 'null'); print(eval(sys.argv[2]))" "$1" "$2"; }
 jstr() { python3 -c "import json,sys; print(json.dumps(sys.argv[1]))" "$1"; }
 
+# create_with_retry PATH JSON -> POST; if Coolify answers 422 "This field is not allowed",
+# drop those fields and retry (Coolify versions differ). Dropped field names go to DROPPED.
+create_with_retry() {
+  local path="$1" body="$2" i bad
+  DROPPED=""
+  for i in 1 2 3 4; do
+    api POST "$path" "$body"
+    [ "$CODE" = 422 ] || return 0
+    bad=$(python3 -c "import json,sys
+try: e=json.loads(sys.argv[1]).get('errors',{})
+except Exception: e={}
+print(' '.join(k for k,v in e.items() if any('not allowed' in str(x) for x in (v if isinstance(v,list) else [v]))))" "$BODY")
+    [ -n "$bad" ] || return 0
+    DROPPED="$DROPPED $bad"
+    body=$(python3 -c "import json,sys; d=json.loads(sys.argv[1]); [d.pop(k,None) for k in sys.argv[2].split()]; print(json.dumps(d))" "$body" "$bad")
+  done
+}
+
+# ensure_network KIND UUID -> make sure the resource joins the predefined 'coolify' docker network
+# (the hub reaches supabase-db / supabase-kong by container name). Sets NET_CHANGED=1 if it changed it.
+ensure_network() {
+  local kind="$1" uuid="$2" cur
+  NET_CHANGED=0
+  api GET "/$kind/$uuid"; cur=$(jget "$BODY" "str(d.get('connect_to_docker_network', ''))")
+  [ "$cur" = "True" ] && { ok "$kind joins the coolify network"; return 0; }
+  api PATCH "/$kind/$uuid" '{"connect_to_docker_network":true}'
+  if [ "$CODE" = 200 ] || [ "$CODE" = 201 ]; then NET_CHANGED=1; ok "$kind now joins the coolify network"; return 0; fi
+  warn "could not enable 'Connect To Predefined Network' via API (HTTP $CODE): $BODY"
+  if [ "$kind" = services ]; then
+    echo "    Coolify > $SVC_NAME > General (settings) > enable 'Connect To Predefined Network' > Save, then re-run"
+  else
+    echo "    Coolify > $APP_NAME > Advanced > enable 'Connect To Predefined Network' > Save, then re-run"
+  fi
+  exit 3
+}
+
 # ------------------------------------------------------------
 say "1. Coolify"
 api GET /version; v=$BODY
@@ -113,11 +149,13 @@ api GET /services; svcs=$BODY
 SVC_UUID=$(jget "$svcs" "next((s['uuid'] for s in d if s.get('name')=='$SVC_NAME'), '')")
 if [ -z "$SVC_UUID" ]; then
   body=$(python3 -c "import json; print(json.dumps({'type':'supabase','name':'$SVC_NAME','project_uuid':'$PROJECT_UUID','environment_name':'$ENV_NAME','server_uuid':'$SERVER_UUID','instant_deploy':False,'connect_to_docker_network':True,'description':'Travel.with.Jaws DB/API'}))")
-  api POST /services "$body"; r=$BODY; [ "$CODE" = 201 ] || [ "$CODE" = 200 ] || die "Supabase create failed (HTTP $CODE): $r"
+  create_with_retry /services "$body"; r=$BODY; [ "$CODE" = 201 ] || [ "$CODE" = 200 ] || die "Supabase create failed (HTTP $CODE): $r"
+  [ -n "$DROPPED" ] && ok "retried without fields this Coolify rejects:$DROPPED"
   SVC_UUID=$(jget "$r" "d['uuid']"); ok "created: $SVC_UUID"
 else
   ok "existing service: $SVC_UUID"
 fi
+ensure_network services "$SVC_UUID"; SVC_NET_CHANGED=$NET_CHANGED
 
 api GET "/services/$SVC_UUID/envs"; envs=$BODY
 envval() { jget "$envs" "next((e.get('real_value') or e.get('value') or '' for e in d if e['key']=='$1'), '')"; }
@@ -133,7 +171,7 @@ fi
 
 api GET "/services/$SVC_UUID"; status=$(jget "$BODY" "d.get('status','')")
 if [[ "$status" != running* ]]; then api GET "/services/$SVC_UUID/start"; ok "start requested"
-elif [ "$SCHEMA_CHANGED" = 1 ]; then api GET "/services/$SVC_UUID/restart"; ok "restarted to apply schemas"
+elif [ "$SCHEMA_CHANGED" = 1 ] || [ "$SVC_NET_CHANGED" = 1 ]; then api GET "/services/$SVC_UUID/restart"; ok "restarted to apply schema / network changes"
 else ok "already running"; fi
 printf '  waiting for Supabase'
 t=0
@@ -173,12 +211,14 @@ print(json.dumps({
 }))
 PY
 )
-  api POST /applications/private-github-app "$body"; r=$BODY
+  create_with_retry /applications/private-github-app "$body"; r=$BODY
   [ "$CODE" = 201 ] || [ "$CODE" = 200 ] || die "hub app create failed (HTTP $CODE): $r"
+  [ -n "$DROPPED" ] && ok "retried without fields this Coolify rejects:$DROPPED"
   APP_UUID=$(jget "$r" "d['uuid']"); ok "created: $APP_UUID"
 else
   ok "existing app: $APP_UUID"
 fi
+ensure_network applications "$APP_UUID"
 
 # ------------------------------------------------------------
 say "4. Environment variables"
