@@ -227,8 +227,8 @@ else
 fi
 ensure_network applications "$APP_UUID"
 # Coolify's own rollout check: give the first boot (wait for DB + migrations) up to ~3 minutes
-send_with_retry PATCH "/applications/$APP_UUID" '{"health_check_enabled":true,"health_check_path":"/api/health","health_check_port":"3000","health_check_interval":10,"health_check_timeout":5,"health_check_retries":18,"health_check_start_period":90}'
-if [ "$CODE" = 200 ] || [ "$CODE" = 201 ]; then ok "health check: every 10s, up to 18 tries${DROPPED:+ (not accepted:$DROPPED)}"
+send_with_retry PATCH "/applications/$APP_UUID" '{"health_check_enabled":true,"health_check_host":"127.0.0.1","health_check_path":"/api/health","health_check_port":"3000","health_check_interval":10,"health_check_timeout":5,"health_check_retries":18,"health_check_start_period":90}'
+if [ "$CODE" = 200 ] || [ "$CODE" = 201 ]; then ok "health check: 127.0.0.1:3000/api/health every 10s, up to 18 tries${DROPPED:+ (not accepted:$DROPPED)}"
 else warn "health check settings not updated (HTTP $CODE): $BODY"; fi
 
 # ------------------------------------------------------------
