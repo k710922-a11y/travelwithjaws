@@ -66,11 +66,12 @@ jstr() { python3 -c "import json,sys; print(json.dumps(sys.argv[1]))" "$1"; }
 
 # create_with_retry PATH JSON -> POST; if Coolify answers 422 "This field is not allowed",
 # drop those fields and retry (Coolify versions differ). Dropped field names go to DROPPED.
-create_with_retry() {
-  local path="$1" body="$2" i bad
+create_with_retry() { send_with_retry POST "$@"; }
+send_with_retry() {
+  local method="$1" path="$2" body="$3" i bad
   DROPPED=""
   for i in 1 2 3 4; do
-    api POST "$path" "$body"
+    api "$method" "$path" "$body"
     [ "$CODE" = 422 ] || return 0
     bad=$(python3 -c "import json,sys
 try: e=json.loads(sys.argv[1]).get('errors',{})
@@ -225,6 +226,10 @@ else
   ok "existing app: $APP_UUID"
 fi
 ensure_network applications "$APP_UUID"
+# Coolify's own rollout check: give the first boot (wait for DB + migrations) up to ~3 minutes
+send_with_retry PATCH "/applications/$APP_UUID" '{"health_check_enabled":true,"health_check_path":"/api/health","health_check_port":"3000","health_check_interval":10,"health_check_timeout":5,"health_check_retries":18,"health_check_start_period":90}'
+if [ "$CODE" = 200 ] || [ "$CODE" = 201 ]; then ok "health check: every 10s, up to 18 tries${DROPPED:+ (not accepted:$DROPPED)}"
+else warn "health check settings not updated (HTTP $CODE): $BODY"; fi
 
 # ------------------------------------------------------------
 say "4. Environment variables"
