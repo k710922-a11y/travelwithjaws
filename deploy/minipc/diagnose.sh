@@ -94,6 +94,10 @@ else
     say "Coolify app log: recent errors"
     $DOCKER logs --since 90m coolify 2>&1 | grep -iE "error|exception|fail" | grep -v -i "deprecat" | tail -15 | mask | cut -c1-300 | sed 's/^/  /'
   fi
+  say "networks (hub must share one with supabase-db)"
+  for c in $($DOCKER ps -a --format '{{.Names}}' | grep -E "^supabase-db-${SVC_UUID:-none}$|^${APP_UUID:-none}"); do
+    echo "  $c: $($DOCKER inspect -f '{{range $k, $v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$c" 2>/dev/null)"
+  done
   say "disk / memory"
   df -h / /var/lib/docker 2>/dev/null | sed 's/^/  /'
   free -h | sed 's/^/  /'
@@ -110,8 +114,8 @@ x=deps[0]; print('  status:', x.get('status'), ' commit:', str(x.get('commit',''
 logs=x.get('logs') or '[]'
 try: logs=json.loads(logs)
 except Exception: logs=[{'output':str(logs)}]
-lines=[l.get('output','') for l in logs if not l.get('hidden')]
-for l in lines[-int(sys.argv[1]):]: print('  ', str(l).rstrip()[:300])" "$LINES" | mask
+lines=[ln for l in logs for ln in str(l.get('output','')).splitlines() if ln.strip() and 'Healthcheck logs' not in ln and not ln.startswith('[{"Start')]
+for l in lines[-int(sys.argv[1])-30:]: print('  ', l.rstrip()[:300])" "$LINES" | mask
   say "hub: container log (Coolify)"
   get "/applications/$APP_UUID/logs?lines=$LINES" | python3 -c "import json,sys
 try: d=json.load(sys.stdin); print(d.get('logs', d) if isinstance(d,dict) else d)
