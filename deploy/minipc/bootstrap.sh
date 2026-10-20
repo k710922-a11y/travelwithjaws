@@ -309,3 +309,4 @@ echo "  console: $DOMAIN/console"
 if [ -n "$NEW_LOGIN" ]; then echo "  console login (new): $NEW_LOGIN"; echo "  (also saved to $SECRETS_FILE, mode 600)"
 else echo "  console login: unchanged (Coolify > $APP_NAME > Environment Variables > CONSOLE_USERS)"; fi
 echo "  next deploys: push to GitHub main"
+exit 0
