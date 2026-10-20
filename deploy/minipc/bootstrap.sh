@@ -54,6 +54,12 @@ api() {
   fi
   BODY=$(cat "$out"); rm -f "$out"
 }
+# action PATH -> start/restart/deploy. Coolify 4.4+ wants POST, older versions GET.
+action() {
+  api POST "$1"
+  if [ "$CODE" = 405 ] || [ "$CODE" = 404 ]; then api GET "$1"; fi
+  case "$CODE" in 200|201|202) return 0;; *) return 1;; esac
+}
 # jget JSON python-expression -> value
 jget() { python3 -c "import json,sys; d=json.loads(sys.argv[1] or 'null'); print(eval(sys.argv[2]))" "$1" "$2"; }
 jstr() { python3 -c "import json,sys; print(json.dumps(sys.argv[1]))" "$1"; }
@@ -170,8 +176,8 @@ else
 fi
 
 api GET "/services/$SVC_UUID"; status=$(jget "$BODY" "d.get('status','')")
-if [[ "$status" != running* ]]; then api GET "/services/$SVC_UUID/start"; ok "start requested"
-elif [ "$SCHEMA_CHANGED" = 1 ] || [ "$SVC_NET_CHANGED" = 1 ]; then api GET "/services/$SVC_UUID/restart"; ok "restarted to apply schema / network changes"
+if [[ "$status" != running* ]]; then action "/services/$SVC_UUID/start" || die "Supabase start failed (HTTP $CODE): $BODY"; ok "start requested"
+elif [ "$SCHEMA_CHANGED" = 1 ] || [ "$SVC_NET_CHANGED" = 1 ]; then action "/services/$SVC_UUID/restart" || die "Supabase restart failed (HTTP $CODE): $BODY"; ok "restarted to apply schema / network changes"
 else ok "already running"; fi
 printf '  waiting for Supabase'
 t=0
@@ -253,7 +259,7 @@ setenv NEXT_PUBLIC_SITE_URL "$DOMAIN"
 
 # ------------------------------------------------------------
 say "5. Deploy"
-api GET "/deploy?uuid=$APP_UUID&force=false"; r=$BODY; [ "$CODE" = 200 ] || die "deploy request failed (HTTP $CODE): $r"
+action "/deploy?uuid=$APP_UUID&force=false"; r=$BODY; [ "$CODE" = 200 ] || [ "$CODE" = 201 ] || [ "$CODE" = 202 ] || die "deploy request failed (HTTP $CODE): $r"
 ok "deploy queued - first build takes 3-6 minutes"
 printf '  waiting for the hub'
 t=0; HEALTH=""; HOK=""
