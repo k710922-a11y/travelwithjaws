@@ -7,7 +7,7 @@ import { startHeroScene } from "./heroScene.js";
 import { send } from "./Track";
 import type { PortalData } from "@/lib/feed";
 
-export default function Portal({ data, heroVideo, demo }: { data: PortalData; heroVideo: { src: string; poster: string } | null; demo?: boolean }) {
+export default function Portal({ data, heroVideo, demo }: { data: PortalData; heroVideo: { src: string; poster: string } | null; demo?: "db" | "mixed" | null }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!ref.current) return;
@@ -24,7 +24,8 @@ export default function Portal({ data, heroVideo, demo }: { data: PortalData; he
   // 스크립트가 돌기 전·검색 수집기용: 같은 내용을 단순 목록으로 먼저 그려 둔다
   return (
     <>
-    {demo && <div className="demo-strip gut">데모 모드 — 예시 데이터입니다. 실제 크리에이터·숙소·제휴가 아닙니다.</div>}
+    {demo === "db" && <div className="demo-strip gut">데모 모드 — 예시 데이터입니다. 실제 크리에이터·숙소·제휴가 아닙니다.</div>}
+    {demo === "mixed" && <div className="demo-strip gut">화면 확인용 예시 데이터가 들어 있습니다 — <b>예시</b> 표시가 붙은 크리에이터·숙소·공지는 실제가 아니며 링크는 example.com 입니다.</div>}
     <div ref={ref}>
       <main className="gut" style={{ paddingBlock: 40 }}>
         <div className="in">

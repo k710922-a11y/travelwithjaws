@@ -144,7 +144,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .poster svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .poster .wv { transition: transform 1.6s ease; }
 .it:hover .poster .wv { transform: translateX(-12%); }
-.poster .tag { position: absolute; left: 10px; top: 10px; }
+.poster .tag { position: absolute; left: 10px; top: 10px; display: flex; gap: 4px; align-items: center; }
+.demo-tag { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .02em;
+  background: #fff3c4; color: #6b4e00; border: 1px solid #e9c75a; line-height: 1.5; white-space: nowrap; }
 .poster .dur { position: absolute; right: 10px; bottom: 10px; font-family: var(--display); font-weight: 700; font-size: var(--fs-xs); background: rgba(8,21,31,.72); color: #fff; padding: 2px 8px; border-radius: 8px; }
 .poster .play { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.85); display: grid; place-items: center; transition: scale .2s; }
 .it:hover .play { scale: 1.08; }
@@ -229,7 +231,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .bar .in { gap: 10px; }
   .mark b { font-size: 0.98rem; }
   .hero { height: auto; min-height: 640px; }
-  .hero .in { justify-content: flex-start; padding-block: 64px 120px; }
+  .hero .in { justify-content: flex-start; padding-block: 56px 20px; height: auto; }
+  /* 좁은 화면: 매체 칩이 검색 상자를 가리지 않도록 흐름 안에 둔다 */
+  .mediabelt { position: relative; bottom: auto; padding-bottom: 22px; }
   .finder .go { width: 100%; margin-left: 0; }
   .dial { min-width: 100%; }
 }

@@ -70,6 +70,7 @@ export function posterSVG(id, kind, vertical) {
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${g}</svg>`;
 }
 
+const demoTag = i => (i.demo ? `<span class="demo-tag" title="화면 확인용 예시 데이터">예시</span>` : "");
 function badge(p) { const m = PF[p] ?? { label: p, glyph: "•" }; return `<span class="pf ${p}"><i>${m.glyph}</i>${m.label}</span>`; }
 
 const MARK = `<svg viewBox="0 0 40 40" aria-hidden="true"><defs><clipPath id="mk"><circle cx="20" cy="20" r="19"/></clipPath></defs>
@@ -84,7 +85,7 @@ const ICON_CITY = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 function shell(d, opts) {
   const count = k => k === "all" ? d.items.length : d.items.filter(i => TABS.find(t => t.key === k).match(i.platform)).length;
   const latest = [...d.items].sort((a, b) => b.published.localeCompare(a.published)).slice(0, 10);
-  const tick = latest.map(i => `<button class="tk" data-open="${i.id}">${badge(i.platform)} ${esc(i.title)} <span>${esc(i.place)}</span></button>`).join("");
+  const tick = latest.map(i => `<button class="tk" data-open="${i.id}">${badge(i.platform)}${demoTag(i)} ${esc(i.title)} <span>${esc(i.place)}</span></button>`).join("");
   return `
   <header class="bar gut"><div class="in">
     <a class="mark" href="#top" aria-label="Travel.with.Jaws 처음으로">${MARK}<b>Travel<i>.</i>with<i>.</i>Jaws</b></a>
@@ -191,7 +192,7 @@ export function mountPortal(root, data, opts = {}) {
       ? `<div class="doc"><b>근거 정리</b> 공식 ${i.ledger?.[0] ?? 0} · 경험 ${i.ledger?.[1] ?? 0} · 미확인 ${i.ledger?.[3] ?? 0}</div>`
       : (v || i.platform === "yt") ? `<span class="play" aria-hidden="true"></span>` : "";
     return `<button class="it ${v ? "v" : ""} ${far ? "far" : ""}" data-open="${i.id}" data-id="${i.id}" type="button">
-      <div class="poster">${posterSVG(i.id, k, v)}<span class="tag">${badge(i.platform)}</span>${media}${i.platform === "hub_doc" ? "" : `<span class="dur">${esc(i.duration)}</span>`}</div>
+      <div class="poster">${posterSVG(i.id, k, v)}<span class="tag">${badge(i.platform)}${demoTag(i)}</span>${media}${i.platform === "hub_doc" ? "" : `<span class="dur">${esc(i.duration)}</span>`}</div>
       <div class="body">
         <div class="who"><span>${esc(i.creator)}</span><span>${fmtDate(i.published)}</span></div>
         <h3>${esc(i.title)}</h3>
@@ -247,7 +248,7 @@ export function mountPortal(root, data, opts = {}) {
     const cols = ["var(--official-c)", "var(--review)", "var(--editorial)", "var(--unverified)"], names = ["공식", "경험", "해석", "미확인"];
     $("[data-docs]").innerHTML = docs.map(i => {
       const L = i.ledger || [0, 0, 0, 0], tot = L.reduce((a, b) => a + b, 0) || 1;
-      return `<button class="dcard" data-open="${i.id}" type="button"><span class="who" style="display:flex;gap:8px;font-size:var(--fs-xs);color:var(--muted)">${badge("hub_doc")}<span>${esc(i.region)}</span><span>${fmtDate(i.published)} 확인</span></span>
+      return `<button class="dcard" data-open="${i.id}" type="button"><span class="who" style="display:flex;gap:8px;font-size:var(--fs-xs);color:var(--muted)">${badge("hub_doc")}${demoTag(i)}<span>${esc(i.region)}</span><span>${fmtDate(i.published)} 확인</span></span>
         <h3>${esc(i.title)}</h3>
         <span class="ledger" aria-hidden="true">${L.map((n, k) => `<span style="width:${n / tot * 100}%;background:${cols[k]}"></span>`).join("")}</span>
         <span class="legend">${L.map((n, k) => `<span>${names[k]} <b>${n}</b></span>`).join("")}</span></button>`;
@@ -265,7 +266,7 @@ export function mountPortal(root, data, opts = {}) {
     $("[data-layer]").innerHTML = `<div class="scrim" data-close></div>
     <aside class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t">
       <button class="close" data-close aria-label="닫기" type="button">✕</button>
-      <div class="poster">${posterSVG(i.id + "s", kindOf(i.seaCity), false)}<span class="tag">${badge(i.platform)}</span><span class="dur">${esc(i.duration)}</span></div>
+      <div class="poster">${posterSVG(i.id + "s", kindOf(i.seaCity), false)}<span class="tag">${badge(i.platform)}${demoTag(i)}</span><span class="dur">${esc(i.duration)}</span></div>
       <div class="sc">
         <div class="who" style="display:flex;gap:10px;flex-wrap:wrap;font-size:var(--fs-xs);color:var(--muted)"><span>${esc(i.creator)}</span><span>${fmtDate(i.published)}</span><span>${esc(i.place)}, ${esc(i.region)}</span></div>
         <h2 id="sh-t">${esc(i.title)}</h2>

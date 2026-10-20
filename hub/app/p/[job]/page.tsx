@@ -34,7 +34,7 @@ export default async function HubPage({ params }: Props) {
   const checked = hub.checked_at ? new Date(hub.checked_at).toLocaleDateString("ko-KR") : "미기록";
 
   return (
-    <DocShell><main>
+    <DocShell demo={hub.is_demo}><main>
       <Track jobNo={hub.job_no} event="hub_arrive" />
       <p className="eyebrow">
         <span className="chip">{hub.segment === "inbound" ? "방한" : "국내"}</span>

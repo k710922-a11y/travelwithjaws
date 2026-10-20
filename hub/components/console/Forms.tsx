@@ -1,6 +1,6 @@
 "use client";
 import { useActionState, useRef, useState } from "react";
-import { setJobStatus, feedAction, closeCorrection, type ActionState } from "@/app/console/actions";
+import { setJobStatus, feedAction, closeCorrection, demoData, type ActionState } from "@/app/console/actions";
 
 const STATUS_KO: Record<string, string> = {
   received: "접수", material_check: "자료 확인", ready: "제작 대기", rendering: "합성", review: "검수",
@@ -64,6 +64,24 @@ export function CorrectionForm({ id }: { id: string }) {
         <button type="submit" onClick={pick("fixed")} className="primary" disabled={pending}>반영 완료</button>
         <button type="submit" onClick={pick("rejected")} disabled={pending}>기각</button>
       </div>
+      <Result s={state} />
+    </form>
+  );
+}
+
+export function DemoDataForm() {
+  const [state, act, pending] = useActionState(demoData, null);
+  const op = useRef<HTMLInputElement>(null);
+  const pick = (v: string) => (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (v === "remove" && !confirm("예시 데이터를 모두 지울까요? 실제 데이터는 지워지지 않습니다.")) { e.preventDefault(); return; }
+    if (op.current) op.current.value = v;
+  };
+  return (
+    <form action={act} className="jform demo-form">
+      <input type="hidden" name="op" ref={op} defaultValue="load" />
+      <span className="lbl">화면 확인용 예시 데이터</span>
+      <button type="submit" onClick={pick("load")} disabled={pending}>{pending ? "처리 중" : "넣기 / 새로 고침"}</button>
+      <button type="submit" onClick={pick("remove")} disabled={pending} className="ghost">모두 지우기</button>
       <Result s={state} />
     </form>
   );

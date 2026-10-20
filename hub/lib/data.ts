@@ -22,6 +22,7 @@ export type HubRow = {
   checked_at: string | null;
   version_id: string;
   youtube_url: string | null;
+  is_demo?: boolean;
 };
 
 export type Card = {

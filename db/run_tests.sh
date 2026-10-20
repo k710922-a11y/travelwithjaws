@@ -17,10 +17,10 @@ run_suite() {
   echo "$out" | grep -E "NOTICE:  (OK|FAIL)|ERROR" | sed 's/.*NOTICE:  //'
 }
 
-result=$( { run_suite trip_test_a seed/test_rules.sql seed/test_portal.sql seed/test_console.sql; run_suite trip_test_b seed/test_longform.sql; } )
+result=$( { run_suite trip_test_a seed/test_rules.sql seed/test_portal.sql seed/test_console.sql seed/test_demo.sql; run_suite trip_test_b seed/test_longform.sql; } )
 echo "$result"
 ok=$(grep -c "^OK" <<<"$result" || true)
 bad=$(grep -cE "^FAIL|ERROR" <<<"$result" || true)
 echo "----"
 echo "통과 $ok · 실패 $bad"
-[ "$bad" -eq 0 ] && [ "$ok" -ge 53 ]
+[ "$bad" -eq 0 ] && [ "$ok" -ge 65 ]

@@ -35,3 +35,13 @@ export async function closeCorrection(_: ActionState, form: FormData): Promise<A
   if (r.ok) revalidatePath("/console/corrections");
   return r.ok ? { ok: true, message: "정정 요청을 처리했습니다." } : r;
 }
+
+// 화면 확인용 예시 데이터: 실제와 같은 규칙으로 넣고(load_demo), 표시된 것만 지운다(remove_demo)
+export async function demoData(_: ActionState, form: FormData): Promise<ActionState> {
+  await actor();
+  const op = String(form.get("op") ?? "");
+  if (op !== "load" && op !== "remove") return { ok: false, message: "알 수 없는 요청입니다." };
+  const r = await rpc(op === "load" ? "load_demo" : "remove_demo", {});
+  if (r.ok) { revalidatePath("/", "layout"); }
+  return r.ok ? { ok: true, message: op === "load" ? "예시 데이터를 넣었습니다. 포털에서 '예시' 표시로 확인하세요." : "예시 데이터를 모두 지웠습니다. 실제 데이터는 그대로입니다." } : r;
+}

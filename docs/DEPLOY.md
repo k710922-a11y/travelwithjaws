@@ -108,3 +108,13 @@ DB 변경이 있으면: 새 번호 파일(db/migrations/006_….sql) 추가 → 
 
 ## 3. 백업
 Coolify → travel-supabase → Backups → 매일 1회, 보관 7일 이상. 첫 운영 데이터가 들어가기 전에 복원 시험을 한 번 해 둡니다.
+
+## 화면 확인용 예시 데이터
+
+- `trip.load_demo()` 로 넣고 `trip.remove_demo()` 로 지운다 (`db/migrations/006_demo.sql`). 실제 데이터는 건드리지 않는다.
+- 예시도 실제와 같은 권리·근거·승인 절차를 거쳐 공개되며, 공개 뷰의 `is_demo` 로 화면에 **예시** 표시와 상단 안내가 붙는다.
+- 넣기·지우기 방법 (둘 중 하나)
+  - 편집 콘솔 `/console` 상단의 **넣기 / 새로 고침**, **모두 지우기**
+  - 작업 PC PowerShell:
+    `Get-Content -LiteralPath "<repo>\deploy\minipc\demo-data.sh" -Raw | ssh keymedi@192.168.0.202 "bash -s"` (지우기는 `"ACTION=remove bash -s"`)
+- 실제 운영을 시작하기 전에 반드시 지운다.

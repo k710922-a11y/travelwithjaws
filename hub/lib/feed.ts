@@ -5,7 +5,7 @@ export type FeedItem = {
   id: string; platform: string; creator: string; title: string; published: string; duration: string;
   place: string; region: string; theme: string; segment: string; seaCity: number; with: string[];
   summary: string | null; summaryReason?: string | null; evidence: "official" | "review" | "none";
-  sponsored: boolean; disclosure?: string | null; url: string; job?: string | null; ledger?: number[];
+  sponsored: boolean; disclosure?: string | null; url: string; job?: string | null; ledger?: number[]; demo?: boolean;
 };
 export type Collection = { id: string; title: string; sub: string; mood: "sea" | "mix" | "city"; items: string[] };
 export type PortalData = { items: FeedItem[]; collections: Collection[]; themes: { key: string; label: string; segment: string }[] };
@@ -35,7 +35,7 @@ export async function getPortalData(): Promise<PortalData> {
     duration: f.duration_label ?? "", place: f.place_label ?? "", region: f.region ?? "", theme: f.theme, segment: f.segment,
     seaCity: f.sea_city ?? 0, with: f.companions ?? [], summary: f.summary, summaryReason: f.summary_reason,
     evidence: f.evidence, sponsored: f.sponsored, disclosure: f.disclosure, url: f.url, job: f.job_no,
-    ledger: f.platform === "hub_doc" ? ledger.get(f.id) : undefined,
+    ledger: f.platform === "hub_doc" ? ledger.get(f.id) : undefined, demo: !!f.is_demo,
   }));
   const collections: Collection[] = (cols ?? []).map((c: any) => ({ id: c.slug, title: c.title, sub: c.subtitle ?? "", mood: c.mood, items: c.item_ids }));
   return { items, collections, themes: (demo as any).themes };

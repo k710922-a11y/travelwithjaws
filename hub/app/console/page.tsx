@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getJobs, getSummary, STATUS_KO } from "@/lib/console";
-import { JobStatusForm } from "@/components/console/Forms";
+import { JobStatusForm, DemoDataForm } from "@/components/console/Forms";
 
 const FLOW = ["received", "material_check", "ready", "rendering", "review", "approved", "published", "held"];
 
@@ -18,6 +18,7 @@ export default async function JobsPage({ searchParams }: Props) {
       <header className="ch">
         <h1>작업 현황</h1>
         <p>쇼츠 작업 {sum.jobs}건 · 공개 쇼츠 {sum.public_shorts}편{toLong ? ` · 롱폼 착수 조건까지 ${toLong}편 남음` : " · 롱폼 착수 조건 충족"}</p>
+        <DemoDataForm />
       </header>
 
       <nav className="flow" aria-label="상태별 보기">
