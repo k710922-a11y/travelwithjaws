@@ -26,6 +26,10 @@ ENV_NAME="${ENV_NAME:-production}"
 REPO="${REPO:-k710922-a11y/travelwithjaws}"
 BRANCH="${BRANCH:-main}"
 DOMAIN="${DOMAIN:-https://travel.jawsweb.site}"
+# Cloudflare terminates HTTPS and the tunnel talks plain HTTP to Traefik (http://127.0.0.1:80).
+# So Coolify must route the domain as http:// - an https:// domain makes Traefik redirect http->https,
+# Cloudflare sends it back over http, and the browser ends in ERR_TOO_MANY_REDIRECTS.
+ROUTE_DOMAIN="${ROUTE_DOMAIN:-http://${DOMAIN#https://}}"
 SVC_NAME="${SVC_NAME:-travel-supabase}"
 APP_NAME="${APP_NAME:-travelwithjaws-hub}"
 STAFF_NAME="${STAFF_NAME:-Jungsoo}"
@@ -204,7 +208,7 @@ say "3. Hub app ($APP_NAME)"
 api GET /applications; allapps=$BODY
 APP_UUID=$(jget "$allapps" "next((a['uuid'] for a in d if a.get('name')=='$APP_NAME'), '')")
 if [ -z "$APP_UUID" ]; then
-  body=$(python3 - "$PROJECT_UUID" "$SERVER_UUID" "$ENV_NAME" "$GH_APP_UUID" "$REPO" "$BRANCH" "$DOMAIN" "$APP_NAME" <<'PY'
+  body=$(python3 - "$PROJECT_UUID" "$SERVER_UUID" "$ENV_NAME" "$GH_APP_UUID" "$REPO" "$BRANCH" "$ROUTE_DOMAIN" "$APP_NAME" <<'PY'
 import json, sys
 p, s, e, g, repo, br, dom, name = sys.argv[1:]
 print(json.dumps({
@@ -226,6 +230,12 @@ else
   ok "existing app: $APP_UUID"
 fi
 ensure_network applications "$APP_UUID"
+api GET "/applications/$APP_UUID"; cur_fqdn=$(jget "$BODY" "d.get('fqdn') or ''")
+if [ "$cur_fqdn" != "$ROUTE_DOMAIN" ]; then
+  send_with_retry PATCH "/applications/$APP_UUID" "{\"domains\":\"$ROUTE_DOMAIN\"}"
+  if [ "$CODE" = 200 ] || [ "$CODE" = 201 ]; then ok "route domain: $ROUTE_DOMAIN (was ${cur_fqdn:-none}; HTTPS is done by Cloudflare)"
+  else warn "could not set the domain (HTTP $CODE): $BODY - set Coolify > $APP_NAME > Domains to $ROUTE_DOMAIN"; fi
+else ok "route domain: $ROUTE_DOMAIN"; fi
 # Coolify's own rollout check: give the first boot (wait for DB + migrations) up to ~3 minutes
 send_with_retry PATCH "/applications/$APP_UUID" '{"health_check_enabled":true,"health_check_host":"127.0.0.1","health_check_path":"/api/health","health_check_port":"3000","health_check_interval":10,"health_check_timeout":5,"health_check_retries":18,"health_check_start_period":90}'
 if [ "$CODE" = 200 ] || [ "$CODE" = 201 ]; then ok "health check: 127.0.0.1:3000/api/health every 10s, up to 18 tries${DROPPED:+ (not accepted:$DROPPED)}"
