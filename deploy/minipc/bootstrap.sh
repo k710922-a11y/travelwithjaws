@@ -19,6 +19,7 @@ set -euo pipefail
 
 COOLIFY_URL="${COOLIFY_URL:-http://localhost:8000}"
 TOKEN="${COOLIFY_TOKEN:?COOLIFY_TOKEN 이 필요합니다 (Coolify → Keys & Tokens → API tokens, 권한 root)}"
+TOKEN=$(printf '%s' "$TOKEN" | tr -d '[:space:]\r' | sed $'s/^\xef\xbb\xbf//')   # 복사할 때 섞인 공백·줄바꿈 제거
 PROJECT_NAME="${PROJECT_NAME:-keymedi}"
 ENV_NAME="${ENV_NAME:-production}"
 REPO="${REPO:-k710922-a11y/travelwithjaws}"
@@ -58,7 +59,19 @@ jstr() { python3 -c "import json,sys; print(json.dumps(sys.argv[1]))" "$1"; }
 
 # ─────────────────────────────────────────────────────────────
 say "1. Coolify 확인"
-api GET /version; v=$BODY; [ "$CODE" = 200 ] || die "API 접속 실패 (HTTP $CODE). 토큰 또는 Settings → API Access 를 확인하세요: $v"
+api GET /version; v=$BODY
+if [ "$CODE" != 200 ]; then
+  echo "  API 응답: HTTP $CODE $v"
+  case "$TOKEN" in *"|"*) shape="번호|비밀값 형식 맞음 (번호 ${TOKEN%%|*})";; *) shape="'|' 가 없음 — 토큰 앞의 '번호|' 까지 전부 복사해야 합니다";; esac
+  echo "  토큰 모양: 길이 ${#TOKEN}자, $shape"
+  hc=$(curl -s -o /dev/null -w '%{http_code}' "$COOLIFY_URL/api/health" || true)
+  echo "  Coolify 상태 확인 주소: HTTP $hc"
+  case "$CODE" in
+    401) die "토큰이 거부됐습니다. 삭제된 토큰이거나 일부만 복사됐을 수 있습니다. 새 토큰을 만들어 '번호|비밀값' 전체를 넣어 주세요." ;;
+    403) die "API 가 꺼져 있거나 이 주소에서 허용되지 않았습니다. Settings → Advanced → API access = Enabled, Allowed API IPs 는 비워 두세요." ;;
+    *)   die "Coolify API 에 접속하지 못했습니다 (COOLIFY_URL=$COOLIFY_URL)." ;;
+  esac
+fi
 ok "Coolify $v"
 
 api GET /servers; servers=$BODY

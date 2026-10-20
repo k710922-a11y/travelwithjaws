@@ -7,9 +7,10 @@
 2. 작업 PC PowerShell 에 붙여 넣기 (`<토큰>` 만 바꿔서):
 
 ```powershell
-$OutputEncoding = [Text.Encoding]::UTF8
-Get-Content -LiteralPath "$HOME\Documents\[AI.프로젝트] 라이브.프로젝트\travelwithjaws\deploy\minipc\bootstrap.sh" -Raw | ssh keymedi@192.168.0.202 "COOLIFY_TOKEN=<토큰> bash -s"
+$OutputEncoding = [Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = [Text.Encoding]::UTF8
+Get-Content -LiteralPath "$HOME\Documents\[AI.프로젝트] 라이브.프로젝트\travelwithjaws\deploy\minipc\bootstrap.sh" -Raw | ssh keymedi@192.168.0.202 "COOLIFY_TOKEN='<토큰>' bash -s"
 ```
+토큰은 `1|abc…` 처럼 가운데 `|` 가 있으므로 **작은따옴표로 감싸야** 합니다.
 
 스크립트가 하는 일: Supabase(travel-supabase) 생성·시작 → API 에 `trip` 노출 → 허브 앱 생성(GitHub 자동 배포) →
 환경변수(내부 DB·API 주소, 키, 콘솔 로그인) → 배포 → 상태 확인. 허브 컨테이너가 시작할 때 DB 마이그레이션을 스스로 적용합니다.
