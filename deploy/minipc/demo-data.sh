@@ -42,3 +42,4 @@ esac
 ok "$r"
 code=$(curl -s -o /dev/null -w '%{http_code}' -m 15 "$DOMAIN/" || echo 000)
 ok "portal: $DOMAIN (HTTP $code)"
+exit 0
