@@ -54,8 +54,8 @@ if [ -n "$CF" ]; then
   sudo "$CF" tunnel --config "$CFG" ingress validate && ok "config valid" || { warn "invalid config - restoring backup"; [ -n "${BK:-}" ] && sudo cp -p "$BK" "$CFG"; die "nothing changed"; }
   sudo "$CF" tunnel --config "$CFG" ingress rule "https://$HOST" | sed 's/^/    /'
 fi
-if systemctl list-units --type=service --all 2>/dev/null | grep -q cloudflared; then
-  UNIT=$(systemctl list-units --type=service --all | grep -o 'cloudflared[^ ]*\.service' | head -1)
+UNIT=$(systemctl list-unit-files 2>/dev/null | grep -oE '^cloudflared(@[^ ]*)?\.service' | head -1)
+if [ -n "$UNIT" ]; then
   sudo systemctl restart "$UNIT" && sleep 3 && systemctl is-active "$UNIT" >/dev/null && ok "restarted $UNIT" || die "$UNIT did not come back: sudo journalctl -u $UNIT -n 30"
 elif sudo docker ps --format '{{.Names}}' | grep -q cloudflared; then
   C=$(sudo docker ps --format '{{.Names}}' | grep cloudflared | head -1); sudo docker restart "$C" >/dev/null && ok "restarted container $C"
