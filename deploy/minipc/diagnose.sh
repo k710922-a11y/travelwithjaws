@@ -86,6 +86,14 @@ else
     say "logs: $c ($st)"
     $DOCKER logs --tail "$LINES" "$c" 2>&1 | mask | sed 's/^/  /'
   done
+  if [ -n "$SVC_UUID" ]; then
+    say "Supabase: compose files Coolify generated"
+    ls -la "/data/coolify/services/$SVC_UUID" 2>&1 | sed 's/^/  /' | head -15
+    say "Supabase: last start attempts (Coolify activity log)"
+    $DOCKER exec coolify-db psql -U coolify -d coolify -At -F ' | ' -c "select id, created_at, coalesce(properties->>'status',''), right(regexp_replace(coalesce(description,''), '\\s+', ' ', 'g'), 2500) from activity_log where properties::text like '%$SVC_UUID%' or coalesce(description,'') like '%$SVC_UUID%' order by id desc limit 3" 2>&1 | mask | fold -w 300 | sed 's/^/  /'
+    say "Coolify app log: recent errors"
+    $DOCKER logs --since 90m coolify 2>&1 | grep -iE "error|exception|fail" | grep -v -i "deprecat" | tail -15 | mask | cut -c1-300 | sed 's/^/  /'
+  fi
   say "disk / memory"
   df -h / /var/lib/docker 2>/dev/null | sed 's/^/  /'
   free -h | sed 's/^/  /'
