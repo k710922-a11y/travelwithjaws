@@ -29,7 +29,8 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
         </nav>
         <div className="me">
           <span>{me.name}</span>
-          {process.env.CF_ACCESS_TEAM_DOMAIN && <a href="/cdn-cgi/access/logout" className="logout">로그아웃</a>}
+          {process.env.CF_ACCESS_TEAM_DOMAIN ? <a href="/cdn-cgi/access/logout" className="logout">로그아웃</a>
+            : process.env.ADMIN_PASSWORD_HASH ? <form method="post" action="/api/admin/logout"><button type="submit" className="logout">로그아웃</button></form> : null}
           {CONSOLE_DEMO && <em>데모 데이터 · 저장 안 됨</em>}
         </div>
       </aside>

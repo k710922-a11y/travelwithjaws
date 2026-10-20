@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createRemoteJWKSet, jwtVerify } from "jose";
+import { adminConfig, readSession, same, SESSION_COOKIE } from "./lib/adminSession";
 
-// 편집 콘솔(관리자) 보호
+// 편집 콘솔(관리자) 보호 — 아래 중 설정된 방식으로 입장
 //
-// 1) 기본: Cloudflare Access — 허용된 이메일만 입장
-//    CF_ACCESS_TEAM_DOMAIN="<팀>.cloudflareaccess.com", CF_ACCESS_AUD="<Access 앱의 AUD 태그>"
-//    CONSOLE_ADMINS="k710922@gmail.com=<staff_uuid>"  (여러 명은 ; 로 구분)
-//    Cloudflare 가 붙여 주는 서명 토큰(Cf-Access-Jwt-Assertion)을 서버가 다시 검증한다.
-//    → 터널을 거치지 않고 미니PC로 직접 들어오는 요청, 토큰 위조, 허용 목록 밖의 이메일은 모두 막힌다.
-// 2) 예비: HTTP 기본 인증 — Access 설정 전까지만. CONSOLE_USERS="이름:비밀번호:staff_uuid;…"
-//    Access 가 설정되면 기본 인증은 꺼진다 (CONSOLE_BASIC_FALLBACK=1 일 때만 함께 허용).
+// 1) 관리자 로그인 (기본): /admin-login 에서 이메일 + 비밀번호 → 서명된 세션 쿠키(12시간)
+//    ADMIN_EMAIL="k710922@gmail.com", ADMIN_PASSWORD_HASH="pbkdf2_sha256:…", ADMIN_SESSION_SECRET, ADMIN_STAFF(선택)
+//    비밀번호는 deploy/minipc/set-admin-password.sh 로 대표가 직접 정한다 (평문 저장 없음).
+// 2) Cloudflare Access (선택): CF_ACCESS_TEAM_DOMAIN + CF_ACCESS_AUD + CONSOLE_ADMINS="이메일=staff_uuid"
+//    설정되면 Cloudflare 이메일 인증을 통과한 허용 이메일만 입장 (서명 토큰을 서버에서 재검증).
+// 3) 예전 방식: HTTP 기본 인증 CONSOLE_USERS="이름:비밀번호:staff_uuid" — 관리자 로그인이 설정되면 꺼진다.
 // 아무것도 설정되지 않으면 콘솔 전체가 404. 데모(DB 미연결)에서만 CONSOLE_DEMO=1 이면 읽기 전용으로 열림.
 // 인증된 사람의 staff id 는 x-console-staff 헤더로 서버에 전달 (외부에서 보낸 같은 헤더는 지움)
 
@@ -30,13 +30,6 @@ function admins(): Admin[] {
     .filter((a) => a.email.includes("@") && a.staff);
 }
 
-function same(a: string, b: string) {
-  if (a.length !== b.length) return false;
-  let d = 0;
-  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return d === 0;
-}
-
 let jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
 let jwksFor = "";
 
@@ -50,8 +43,7 @@ async function accessEmail(req: NextRequest, team: string, aud: string): Promise
   }
   try {
     const { payload } = await jwtVerify(token, jwks, { issuer: `https://${team}`, audience: aud });
-    const email = typeof payload.email === "string" ? payload.email.toLowerCase() : null;
-    return email;
+    return typeof payload.email === "string" ? payload.email.toLowerCase() : null;
   } catch {
     return null;
   }
@@ -69,43 +61,49 @@ export async function middleware(req: NextRequest) {
   const headers = new Headers(req.headers);
   headers.delete("x-console-staff");
   headers.delete("x-console-name");
+  const pass = (staff: string, name: string) => {
+    headers.set("x-console-staff", staff);
+    headers.set("x-console-name", encodeURIComponent(name));
+    return NextResponse.next({ request: { headers } });
+  };
 
+  // 2) Cloudflare Access 가 설정되면 그것만 받는다
   const team = (process.env.CF_ACCESS_TEAM_DOMAIN ?? "").replace(/^https?:\/\//, "").replace(/\/+$/, "");
   const aud = process.env.CF_ACCESS_AUD ?? "";
-  const accessOn = !!(team && aud);
-  const list = users();
-  const basicOn = !accessOn || process.env.CONSOLE_BASIC_FALLBACK === "1";
-
-  if (accessOn) {
+  if (team && aud) {
     const email = await accessEmail(req, team, aud);
-    if (email) {
-      const a = admins().find((x) => x.email === email);
-      if (!a) return deny("허용된 관리자 이메일이 아닙니다. 다른 계정으로 로그인했다면 <a href=\"/cdn-cgi/access/logout\">로그아웃</a> 후 다시 시도해 주세요.");
-      headers.set("x-console-staff", a.staff);
-      headers.set("x-console-name", encodeURIComponent(email));
-      return NextResponse.next({ request: { headers } });
-    }
-    if (!basicOn) return deny("관리자 로그인(Cloudflare 이메일 인증)을 거쳐 들어와 주세요. 포털 오른쪽 위 <b>관리자</b> 버튼을 누르면 로그인 화면으로 갑니다.");
+    if (!email) return deny("관리자 로그인(Cloudflare 이메일 인증)을 거쳐 들어와 주세요. 포털 오른쪽 위 <b>관리자</b> 버튼을 누르면 로그인 화면으로 갑니다.");
+    const a = admins().find((x) => x.email === email);
+    if (!a) return deny("허용된 관리자 이메일이 아닙니다. 다른 계정으로 로그인했다면 <a href=\"/cdn-cgi/access/logout\">로그아웃</a> 후 다시 시도해 주세요.");
+    return pass(a.staff, email);
   }
 
+  // 1) 관리자 로그인 (이메일 + 비밀번호 → 세션 쿠키)
+  const admin = adminConfig();
+  if (admin.on) {
+    const email = await readSession(req.cookies.get(SESSION_COOKIE)?.value, admin.secret);
+    if (email && same(email, admin.email)) return pass(admin.staff, email);
+    const login = new URL("/admin-login", req.url);
+    login.searchParams.set("next", req.nextUrl.pathname + req.nextUrl.search);
+    if (req.method !== "GET") return deny("로그인이 만료되었습니다. 다시 로그인해 주세요.", 401);
+    return NextResponse.redirect(login);
+  }
+
+  // 3) 예전 방식 (관리자 로그인을 설정하기 전까지)
+  const list = users();
   if (!list.length) {
     const demo = process.env.CONSOLE_DEMO === "1" && !process.env.SUPABASE_URL;
     if (demo) return NextResponse.next({ request: { headers } });
     return new NextResponse("Not found", { status: 404 });
   }
-
   const auth = req.headers.get("authorization") ?? "";
   if (auth.startsWith("Basic ")) {
     let decoded = "";
     try { decoded = atob(auth.slice(6)); } catch {}
     const i = decoded.indexOf(":");
-    const name = decoded.slice(0, i), pass = decoded.slice(i + 1);
-    const u = list.find((x) => same(x.name, name) && same(x.pass, pass));
-    if (u) {
-      headers.set("x-console-staff", u.staff);
-      headers.set("x-console-name", encodeURIComponent(u.name));
-      return NextResponse.next({ request: { headers } });
-    }
+    const name = decoded.slice(0, i), pw = decoded.slice(i + 1);
+    const u = list.find((x) => same(x.name, name) && same(x.pass, pw));
+    if (u) return pass(u.staff, u.name);
   }
   return new NextResponse("편집 콘솔 로그인이 필요합니다", {
     status: 401,

@@ -128,3 +128,10 @@ Coolify → travel-supabase → Backups → 매일 1회, 보관 7일 이상. 첫
 - Cloudflare 설정: Zero Trust → Access → Applications → Self-hosted → 도메인 `travel.jawsweb.site`, 경로 `console`
   → 정책 Allow · Include · Emails `k710922@gmail.com` → 로그인 방식 One-time PIN. 앱의 AUD 태그와 팀 도메인을 복사해
   `deploy/minipc/set-admin-access.sh` 로 넣는다.
+
+### 관리자 비밀번호 (기본 입장 방식)
+
+- `/admin-login` 에서 `k710922@gmail.com` + 비밀번호 → 12시간 세션. 같은 주소에서 15분에 10번 틀리면 15분 잠금.
+- 비밀번호는 PBKDF2-SHA256 해시(`ADMIN_PASSWORD_HASH`)로만 저장한다. 바꿀 때마다 세션 비밀값이 바뀌어 모든 기기가 로그아웃된다.
+- 설정·변경: `deploy/minipc/set-admin-password.sh` (PowerShell 에서 비밀번호를 숨김 입력 → base64 로 전달).
+- 설정되면 예전 아이디/비밀번호 창(`CONSOLE_USERS`)은 꺼진다. Cloudflare Access 를 켜면 그것이 우선한다.
