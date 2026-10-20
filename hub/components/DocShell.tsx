@@ -13,6 +13,7 @@ export default function DocShell({ children, demo }: { children: React.ReactNode
           <Link href="/">포털</Link>
           <Link href="/policy">편집 원칙</Link>
           <Link href="/policy#correction">정정 요청</Link>
+          <a href="/console" className="admin-link">관리자</a>
         </nav>
       </header>
       {DEMO && <div className="demo">데모 모드 — DB가 연결되지 않아 예시 데이터를 보여줍니다. 실제 숙소·제휴가 아닙니다.</div>}

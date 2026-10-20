@@ -243,3 +243,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .live { animation: none; }
   .it, .sheet, .poster .wv { transition: none; animation: none; }
 }
+/* 관리자 버튼: 헤더 오른쪽 끝 (입장은 허용된 이메일만 — middleware.ts) */
+.bar .admin { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: var(--fs-xs); font-weight: 600; text-decoration: none; }
+.bar .admin:hover { border-color: var(--ink); }
+@media (max-width: 720px) { .bar .admin span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .bar .admin { padding: 8px; } }

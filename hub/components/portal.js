@@ -90,6 +90,7 @@ function shell(d, opts) {
   <header class="bar gut"><div class="in">
     <a class="mark" href="#top" aria-label="Travel.with.Jaws 처음으로">${MARK}<b>Travel<i>.</i>with<i>.</i>Jaws</b></a>
     <nav class="mtabs" aria-label="매체 고르기">${TABS.map(t => `<button class="mtab" data-tab="${t.key}" aria-pressed="${t.key === "all"}">${t.label}<span class="n">${count(t.key)}</span></button>`).join("")}</nav>
+    ${opts.adminHref === false ? "" : `<a class="admin" href="${esc(opts.adminHref || "/console")}" aria-label="관리자 화면 (허용된 계정만)"><svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>관리자</span></a>`}
   </div></header>
 
   <section class="hero" id="top" aria-label="소개">

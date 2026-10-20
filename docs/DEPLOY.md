@@ -118,3 +118,13 @@ Coolify → travel-supabase → Backups → 매일 1회, 보관 7일 이상. 첫
   - 작업 PC PowerShell:
     `Get-Content -LiteralPath "<repo>\deploy\minipc\demo-data.sh" -Raw | ssh keymedi@192.168.0.202 "bash -s"` (지우기는 `"ACTION=remove bash -s"`)
 - 실제 운영을 시작하기 전에 반드시 지운다.
+
+## 관리자(편집 콘솔) 입장 — k710922@gmail.com 전용
+
+- 포털 오른쪽 위 **관리자** 버튼 → `/console`. 입장은 Cloudflare Access(이메일 일회용 코드)로만 허용한다.
+- 허브 서버(`hub/middleware.ts`)가 Cloudflare 서명 토큰과 이메일을 다시 검증한다 — 터널을 거치지 않은 직접 접속·토큰 위조는 403.
+- 환경변수: `CF_ACCESS_TEAM_DOMAIN`, `CF_ACCESS_AUD`, `CONSOLE_ADMINS="k710922@gmail.com=<staff_uuid>"`.
+  설정되면 기존 아이디/비밀번호(`CONSOLE_USERS`) 로그인은 꺼진다 (`CONSOLE_BASIC_FALLBACK=1` 일 때만 함께 허용).
+- Cloudflare 설정: Zero Trust → Access → Applications → Self-hosted → 도메인 `travel.jawsweb.site`, 경로 `console`
+  → 정책 Allow · Include · Emails `k710922@gmail.com` → 로그인 방식 One-time PIN. 앱의 AUD 태그와 팀 도메인을 복사해
+  `deploy/minipc/set-admin-access.sh` 로 넣는다.
