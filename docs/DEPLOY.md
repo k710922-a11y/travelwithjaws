@@ -1,5 +1,26 @@
 # 미니PC 배포 — travel.jawsweb.site
 
+## 가장 빠른 방법: 원클릭 설치 (권장)
+
+1. Coolify(http://192.168.0.202:8000) → **Keys & Tokens → API tokens** → 이름 `travelwithjaws`, 권한 **root** 로 토큰 생성 → 복사
+   (Settings → Advanced(또는 Configuration)에서 **API Access** 가 꺼져 있으면 켭니다)
+2. 작업 PC PowerShell 에 붙여 넣기 (`<토큰>` 만 바꿔서):
+
+```powershell
+$OutputEncoding = [Text.Encoding]::UTF8
+Get-Content -LiteralPath "$HOME\Documents\[AI.프로젝트] 라이브.프로젝트\travelwithjaws\deploy\minipc\bootstrap.sh" -Raw | ssh keymedi@192.168.0.202 "COOLIFY_TOKEN=<토큰> bash -s"
+```
+
+스크립트가 하는 일: Supabase(travel-supabase) 생성·시작 → API 에 `trip` 노출 → 허브 앱 생성(GitHub 자동 배포) →
+환경변수(내부 DB·API 주소, 키, 콘솔 로그인) → 배포 → 상태 확인. 허브 컨테이너가 시작할 때 DB 마이그레이션을 스스로 적용합니다.
+여러 번 실행해도 이미 만든 것은 재사용합니다. 마지막에 콘솔 로그인 정보가 나오고 미니PC `~/travelwithjaws-secrets.txt` 에도 저장됩니다.
+
+남는 일: Cloudflare Tunnel 에 `travel.jawsweb.site` 공개 호스트 추가 (아래 1-5).
+
+---
+
+## 수동 설치 (참고)
+
 GitHub `k710922-a11y/travelwithjaws` 의 `main` 에 푸시하면 Coolify 가 허브를 다시 빌드해 배포합니다.
 haedong.jawsweb.site 와 같은 방식입니다. DB 는 Travel.with.Jaws 전용 Supabase 를 따로 둡니다.
 
@@ -43,7 +64,7 @@ Coolify → New Resource → Application → GitHub App(위 1-1) → `travelwith
 | 항목 | 값 |
 |---|---|
 | Build Pack | Dockerfile |
-| Base Directory | `/hub` |
+| Base Directory | `/` (Dockerfile `/Dockerfile`) |
 | Port | 3000 |
 | Domain | `https://travel.jawsweb.site` |
 | Health Check Path | `/api/health` |
@@ -53,7 +74,9 @@ Coolify → New Resource → Application → GitHub App(위 1-1) → `travelwith
 
 | 이름 | 값 |
 |---|---|
-| `SUPABASE_URL` | `https://api-travel.jawsweb.site` (같은 서버라면 Coolify 내부 주소도 가능) |
+| `SUPABASE_URL` | `http://supabase-kong-<서비스uuid>:8000` (내부 주소, 앱·서비스 모두 'Connect to Predefined Network' 켬) |
+| `DATABASE_URL` | `postgresql://postgres:<SERVICE_PASSWORD_POSTGRES>@supabase-db-<서비스uuid>:5432/postgres` — 시작 시 마이그레이션 |
+| `CONSOLE_STAFF` | `staff_uuid|이름|역할` — CONSOLE_USERS 의 staff_uuid 와 같은 값, 시작 시 등록 |
 | `SUPABASE_ANON_KEY` | 1-2 의 anon 키 |
 | `SUPABASE_SERVICE_ROLE_KEY` | 1-2 의 service 키 (**Build Variable 체크 해제**, 런타임 전용) |
 | `CONSOLE_USERS` | 1-3 add-staff 출력. 여러 명은 `;` 로 연결 |

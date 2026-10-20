@@ -1,0 +1,10 @@
+.git
+**/node_modules
+**/.next
+docs
+pipeline
+integrations
+**/*.png
+**/*.mp4
+.env*
+**/.env*

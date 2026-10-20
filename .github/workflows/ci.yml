@@ -63,3 +63,40 @@ jobs:
           cache-dependency-path: hub/package-lock.json
       - run: npm ci --no-audit --no-fund
       - run: npm run build
+
+  image:
+    name: 배포 이미지 (빌드 → 시작 시 마이그레이션 → 상태 확인)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: 이미지 빌드
+        run: docker build -t twj-hub .
+      - name: 컨테이너 시작 (서비스 DB 네트워크에 연결)
+        run: |
+          NET=$(docker network ls --format '{{.Name}}' | grep github_network | head -1)
+          PG=$(docker ps --format '{{.Names}}' | grep postgres | head -1)
+          docker run -d --name hub --network "$NET" -p 3000:3000 \
+            -e DATABASE_URL="postgresql://postgres:postgres@$PG:5432/postgres" \
+            -e CONSOLE_STAFF="11111111-2222-3333-4444-555555555555|CI|product" \
+            -e CONSOLE_USERS="ci:ci-pass:11111111-2222-3333-4444-555555555555" \
+            twj-hub
+      - name: 상태 확인 · 콘솔 로그인
+        run: |
+          for i in $(seq 1 40); do curl -sf localhost:3000/api/health && break; sleep 3; done
+          docker logs hub | tee /tmp/hub.log
+          grep -q "새로 적용 5개" /tmp/hub.log
+          grep -q "운영자 확인: CI" /tmp/hub.log
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:3000/console)" = 401
+          test "$(curl -s -o /dev/null -w '%{http_code}' -u ci:ci-pass localhost:3000/console)" = 200
+      - name: 재시작해도 마이그레이션 중복 없음
+        run: |
+          docker restart hub
+          for i in $(seq 1 40); do curl -sf localhost:3000/api/health && break; sleep 3; done
+          docker logs hub 2>&1 | grep -q "새로 적용 0개"

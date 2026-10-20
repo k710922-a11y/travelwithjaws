@@ -25,7 +25,9 @@ travelwithjaws/
 │  ├─ components/portal.js       포털 화면 로직 (매체 탭·바다↔도시 다이얼·컬렉션·테마·상세 시트)
 │  ├─ app/console/               편집 콘솔 (로그인 필요): 작업 현황·피드 승인·롱폼·정정 요청
 │  └─ app/portal.css             포털 디자인 토큰 (라이트·다크)
-├─ deploy/minipc/                미니PC에서 실행: setup-db.sh, add-staff.sh
+├─ Dockerfile                    배포 이미지 (허브 + 시작 시 DB 마이그레이션)
+├─ deploy/minipc/bootstrap.sh    미니PC 원클릭 설치 (Coolify API: Supabase·허브 앱·환경변수·배포)
+├─ deploy/minipc/                setup-db.sh, add-staff.sh (수동 방식)
 ├─ .github/workflows/ci.yml      푸시마다 DB 규칙·합성기·허브 빌드 시험
 ├─ integrations/youtube/
 │  └─ publish.py                  YouTube 공식 업로드: 쇼츠(upload/verify), 롱폼(longform) — 모두 비공개 → 사람 확인 → 공개
