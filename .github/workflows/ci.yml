@@ -7,7 +7,7 @@ on:
 
 jobs:
   db-rules:
-    name: DB 규칙 44건
+    name: DB 규칙 53건
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -63,6 +63,13 @@ jobs:
           cache-dependency-path: hub/package-lock.json
       - run: npm ci --no-audit --no-fund
       - run: npm run build
+      - name: 빌드 시점에 DB 가 없어도 빌드되는지 (Coolify 는 환경변수를 빌드에도 넘김)
+        run: npm run build
+        env:
+          SUPABASE_URL: http://supabase-kong-unreachable:8000
+          SUPABASE_ANON_KEY: x
+          SUPABASE_SERVICE_ROLE_KEY: x
+          DATABASE_URL: postgresql://u:p@unreachable:5432/postgres
 
   image:
     name: 배포 이미지 (빌드 → 시작 시 마이그레이션 → 상태 확인)
