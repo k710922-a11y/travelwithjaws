@@ -98,7 +98,7 @@ jobs:
         run: |
           for i in $(seq 1 40); do curl -sf localhost:3000/api/health && break; sleep 3; done
           docker logs hub | tee /tmp/hub.log
-          grep -q "새로 적용 5개" /tmp/hub.log
+          grep -q "새로 적용 $(ls db/migrations/*.sql | wc -l)개" /tmp/hub.log
           grep -q "운영자 확인: CI" /tmp/hub.log
           test "$(curl -s -o /dev/null -w '%{http_code}' localhost:3000/console)" = 401
           test "$(curl -s -o /dev/null -w '%{http_code}' -u ci:ci-pass localhost:3000/console)" = 200
