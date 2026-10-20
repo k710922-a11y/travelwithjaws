@@ -114,7 +114,7 @@ x=deps[0]; print('  status:', x.get('status'), ' commit:', str(x.get('commit',''
 logs=x.get('logs') or '[]'
 try: logs=json.loads(logs)
 except Exception: logs=[{'output':str(logs)}]
-lines=[ln for l in logs for ln in str(l.get('output','')).splitlines() if ln.strip() and 'Healthcheck logs' not in ln and not ln.startswith('[{"Start')]
+lines=[ln for l in logs for ln in str(l.get('output','')).splitlines() if ln.strip() and 'Healthcheck logs' not in ln and not ln.lstrip().startswith('[{'+chr(34)+'Start')]
 for l in lines[-int(sys.argv[1])-30:]: print('  ', l.rstrip()[:300])" "$LINES" | mask
   say "hub: container log (Coolify)"
   get "/applications/$APP_UUID/logs?lines=$LINES" | python3 -c "import json,sys
