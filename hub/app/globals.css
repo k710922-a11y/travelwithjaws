@@ -58,3 +58,6 @@ section > p.hint { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
 .acard button { font: inherit; font-weight: 700; padding: 12px; border: 0; border-radius: 12px; background: #0f2a3d; color: #fff; cursor: pointer; }
 .acard button:disabled { opacity: .5; cursor: not-allowed; }
 .aback { font-size: .85rem; color: #4f6577; text-align: center; }
+.docph { margin: 8px 0 18px; border-radius: 18px; overflow: hidden; position: relative; aspect-ratio: 16 / 7; background: #cfe6f1; }
+.docph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.docph figcaption { position: absolute; right: 10px; bottom: 8px; font-size: 11px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6); }

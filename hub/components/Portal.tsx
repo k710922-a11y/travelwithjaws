@@ -5,21 +5,22 @@ import { mountPortal } from "./portal.js";
 // @ts-ignore
 import { startHeroScene } from "./heroScene.js";
 import { send } from "./Track";
-import type { PortalData } from "@/lib/feed";
+import type { PortalData, HeroPhoto } from "@/lib/feed";
 
-export default function Portal({ data, heroVideo, demo }: { data: PortalData; heroVideo: { src: string; poster: string } | null; demo?: "db" | "mixed" | null }) {
+export default function Portal({ data, heroVideo, heroPhotos, demo }: { data: PortalData; heroVideo: { src: string; poster: string } | null; heroPhotos?: HeroPhoto[]; demo?: "db" | "mixed" | null }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!ref.current) return;
     const p = mountPortal(ref.current, data, {
       startScene: startHeroScene,
       heroVideo,
+      heroPhotos: heroPhotos ?? [],
       hubBase: "",
       onOpen: (i: any) => i.job && send(i.job, "hub_arrive"),
       onOut: (i: any) => send(i.job ?? "", "source_open"),
     });
     return () => p.destroy();
-  }, [data, heroVideo]);
+  }, [data, heroVideo, heroPhotos]);
 
   // 스크립트가 돌기 전·검색 수집기용: 같은 내용을 단순 목록으로 먼저 그려 둔다
   return (

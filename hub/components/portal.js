@@ -70,6 +70,11 @@ export function posterSVG(id, kind, vertical) {
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${g}</svg>`;
 }
 
+// 실제 사진 (권리 승인된 썸네일) — 없으면 일러스트 포스터
+const sized = (u, w) => u + (u.includes("?") ? "&" : "?") + "w=" + w;
+const photo = (u, w, cls = "ph", eager = false) =>
+  `<img class="${cls}" src="${esc(sized(u, w))}" srcset="${esc(sized(u, w))} 1x, ${esc(sized(u, w * 2))} 2x" alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+const art = (i, seed, kind, vertical, w) => (i.thumb ? photo(i.thumb, w) : posterSVG(seed, kind, vertical));
 const demoTag = i => (i.demo ? `<span class="demo-tag" title="화면 확인용 예시 데이터">예시</span>` : "");
 function badge(p) { const m = PF[p] ?? { label: p, glyph: "•" }; return `<span class="pf ${p}"><i>${m.glyph}</i>${m.label}</span>`; }
 
@@ -93,8 +98,10 @@ function shell(d, opts) {
     ${opts.adminHref === false ? "" : `<a class="admin" href="${esc(opts.adminHref || "/console")}" aria-label="관리자 화면 (허용된 계정만)"><svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>관리자</span></a>`}
   </div></header>
 
-  <section class="hero" id="top" aria-label="소개">
-    ${opts.heroVideo ? `<video autoplay muted loop playsinline preload="metadata" poster="${esc(opts.heroVideo.poster || "")}"><source src="${esc(opts.heroVideo.src)}" type="video/mp4"></video>` : `<canvas aria-hidden="true"></canvas>`}
+  <section class="hero ${!opts.heroVideo && opts.heroPhotos?.length ? "photo" : ""}" id="top" aria-label="소개">
+    ${opts.heroVideo ? `<video autoplay muted loop playsinline preload="metadata" poster="${esc(opts.heroVideo.poster || "")}"><source src="${esc(opts.heroVideo.src)}" type="video/mp4"></video>`
+      : opts.heroPhotos?.length ? `<div class="hph" aria-hidden="true">${opts.heroPhotos.map((h, k) => `<figure class="${k === 0 ? "on" : ""}" data-credit="${esc(h.credit || "")}">${photo(h.uri, 1600, "", k === 0)}</figure>`).join("")}</div><span class="hcredit" data-hcredit>${esc(opts.heroPhotos[0].credit || "")}</span>`
+      : `<canvas aria-hidden="true"></canvas>`}
     <button class="pause" type="button" data-pause>장면 멈추기</button>
     <div class="in gut">
       <h1><span class="w">바다에서 시작해</span> <span class="w">도시의 불빛까지</span></h1>
@@ -164,13 +171,25 @@ export function mountPortal(root, data, opts = {}) {
 
   // 히어로 장면
   let stopScene = null, paused = false;
-  const canvas = $(".hero canvas"), video = $(".hero video");
+  const canvas = $(".hero canvas"), video = $(".hero video"), slides = $$(".hph figure");
   if (canvas && opts.startScene) stopScene = opts.startScene(canvas, { reduced });
+  // 히어로 사진: 6.5초마다 천천히 바뀐다 (움직임 줄이기 설정이면 첫 장만)
+  let slide = 0, slideT = null;
+  const startSlides = () => {
+    if (slides.length < 2 || reduced) return;
+    slideT = setInterval(() => {
+      slides[slide].classList.remove("on"); slide = (slide + 1) % slides.length; slides[slide].classList.add("on");
+      const c = $("[data-hcredit]"); if (c) c.textContent = slides[slide].dataset.credit || "";
+    }, 6500);
+  };
+  if (slides.length) { startSlides(); root.querySelector(".hero").classList.toggle("still", reduced); }
   const pauseBtn = $("[data-pause]");
   if (reduced && !video) pauseBtn.hidden = true;
+  if (slides.length < 2 && !video) pauseBtn.hidden = true;
   pauseBtn.addEventListener("click", () => {
     paused = !paused;
     if (video) paused ? video.pause() : video.play();
+    else if (slides.length) { clearInterval(slideT); root.querySelector(".hero").classList.toggle("still", paused); if (!paused) startSlides(); }
     else if (paused) { stopScene?.(); stopScene = null; }
     else stopScene = opts.startScene?.(canvas, { reduced });
     pauseBtn.textContent = paused ? "장면 재생" : "장면 멈추기";
@@ -193,7 +212,7 @@ export function mountPortal(root, data, opts = {}) {
       ? `<div class="doc"><b>근거 정리</b> 공식 ${i.ledger?.[0] ?? 0} · 경험 ${i.ledger?.[1] ?? 0} · 미확인 ${i.ledger?.[3] ?? 0}</div>`
       : (v || i.platform === "yt") ? `<span class="play" aria-hidden="true"></span>` : "";
     return `<button class="it ${v ? "v" : ""} ${far ? "far" : ""}" data-open="${i.id}" data-id="${i.id}" type="button">
-      <div class="poster">${posterSVG(i.id, k, v)}<span class="tag">${badge(i.platform)}${demoTag(i)}</span>${media}${i.platform === "hub_doc" ? "" : `<span class="dur">${esc(i.duration)}</span>`}</div>
+      <div class="poster">${art(i, i.id, k, v, v ? 420 : 640)}<span class="tag">${badge(i.platform)}${demoTag(i)}</span>${media}${i.platform === "hub_doc" ? "" : `<span class="dur">${esc(i.duration)}</span>`}</div>
       <div class="body">
         <div class="who"><span>${esc(i.creator)}</span><span>${fmtDate(i.published)}</span></div>
         <h3>${esc(i.title)}</h3>
@@ -234,7 +253,8 @@ export function mountPortal(root, data, opts = {}) {
     $("[data-rail]").innerHTML = data.collections.map(c => {
       const its = c.items.map(id => byId[id]).filter(Boolean);
       const kinds = [...new Set(its.map(i => i.platform))];
-      return `<button class="col ${S.coll === c.id ? "on" : ""}" data-coll="${c.id}" type="button">${posterSVG(c.id + "c", c.mood, false)}
+      const cover = its.find(x => x.thumb);
+      return `<button class="col ${S.coll === c.id ? "on" : ""}" data-coll="${c.id}" type="button">${cover ? photo(cover.thumb, 720, "cov") : posterSVG(c.id + "c", c.mood, false)}
         <span class="cap"><h3>${esc(c.title)}</h3><p>${esc(c.sub)}</p><span class="mix">${kinds.map(badge).join("")}</span><p>이야기 ${its.length}개</p></span></button>`;
     }).join("");
   }
@@ -249,7 +269,7 @@ export function mountPortal(root, data, opts = {}) {
     const cols = ["var(--official-c)", "var(--review)", "var(--editorial)", "var(--unverified)"], names = ["공식", "경험", "해석", "미확인"];
     $("[data-docs]").innerHTML = docs.map(i => {
       const L = i.ledger || [0, 0, 0, 0], tot = L.reduce((a, b) => a + b, 0) || 1;
-      return `<button class="dcard" data-open="${i.id}" type="button"><span class="who" style="display:flex;gap:8px;font-size:var(--fs-xs);color:var(--muted)">${badge("hub_doc")}${demoTag(i)}<span>${esc(i.region)}</span><span>${fmtDate(i.published)} 확인</span></span>
+      return `<button class="dcard ${i.thumb ? "has-ph" : ""}" data-open="${i.id}" type="button">${i.thumb ? `<span class="dph">${photo(i.thumb, 640)}</span>` : ""}<span class="who" style="display:flex;gap:8px;font-size:var(--fs-xs);color:var(--muted)">${badge("hub_doc")}${demoTag(i)}<span>${esc(i.region)}</span><span>${fmtDate(i.published)} 확인</span></span>
         <h3>${esc(i.title)}</h3>
         <span class="ledger" aria-hidden="true">${L.map((n, k) => `<span style="width:${n / tot * 100}%;background:${cols[k]}"></span>`).join("")}</span>
         <span class="legend">${L.map((n, k) => `<span>${names[k]} <b>${n}</b></span>`).join("")}</span></button>`;
@@ -267,10 +287,10 @@ export function mountPortal(root, data, opts = {}) {
     $("[data-layer]").innerHTML = `<div class="scrim" data-close></div>
     <aside class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t">
       <button class="close" data-close aria-label="닫기" type="button">✕</button>
-      <div class="poster">${posterSVG(i.id + "s", kindOf(i.seaCity), false)}<span class="tag">${badge(i.platform)}${demoTag(i)}</span><span class="dur">${esc(i.duration)}</span></div>
+      <div class="poster">${art(i, i.id + "s", kindOf(i.seaCity), false, 900)}<span class="tag">${badge(i.platform)}${demoTag(i)}</span><span class="dur">${esc(i.duration)}</span></div>
       <div class="sc">
         <div class="who" style="display:flex;gap:10px;flex-wrap:wrap;font-size:var(--fs-xs);color:var(--muted)"><span>${esc(i.creator)}</span><span>${fmtDate(i.published)}</span><span>${esc(i.place)}, ${esc(i.region)}</span></div>
-        <h2 id="sh-t">${esc(i.title)}</h2>
+        <h2 id="sh-t">${esc(i.title)}</h2>${i.credit ? `<p class="credit">사진: ${esc(i.credit.replace(/^Photo: /, ""))} · 참고용 사진이며 원본 콘텐츠의 장면이 아닐 수 있습니다</p>` : ""}
         <div class="box"><h4>${i.summary ? "편집 요약" : "요약하지 않은 이유"}</h4><p>${esc(i.summary || i.summaryReason)}</p></div>
         <div class="box"><h4>근거 상태</h4><p><span class="ev ${i.evidence}">${EV[i.evidence]}</span></p>
           <p class="note" style="margin-top:6px">${i.evidence === "official" ? "시설·기관이 공지한 내용을 확인 날짜와 함께 정리했어요." : i.evidence === "review" ? "특정 방문자가 특정 시점에 겪은 경험이에요. 내 조건과 같은지 원본에서 확인해 주세요." : "근거 자료를 받지 못해 내용을 정리하지 않았어요."}</p></div>

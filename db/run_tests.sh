@@ -23,4 +23,4 @@ ok=$(grep -c "^OK" <<<"$result" || true)
 bad=$(grep -cE "^FAIL|ERROR" <<<"$result" || true)
 echo "----"
 echo "통과 $ok · 실패 $bad"
-[ "$bad" -eq 0 ] && [ "$ok" -ge 65 ]
+[ "$bad" -eq 0 ] && [ "$ok" -ge 68 ]

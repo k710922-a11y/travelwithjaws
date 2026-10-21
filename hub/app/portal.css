@@ -248,3 +248,29 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: var(--fs-xs); font-weight: 600; text-decoration: none; }
 .bar .admin:hover { border-color: var(--ink); }
 @media (max-width: 720px) { .bar .admin span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .bar .admin { padding: 8px; } }
+/* ---------- 실제 사진 ---------- */
+.poster img.ph, .col img.cov { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.2s cubic-bezier(.2,.7,.2,1); background: #cfe6f1; }
+.it:hover .poster img.ph, .col:hover img.cov { transform: scale(1.05); }
+.poster:has(img.ph)::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,21,31,.28), rgba(8,21,31,0) 28%, rgba(8,21,31,0) 70%, rgba(8,21,31,.35)); pointer-events: none; }
+.poster .tag, .poster .dur, .poster .play, .poster .doc { z-index: 1; }
+.col .cap { z-index: 1; }
+.sheet .credit { margin: -4px 0 0; font-size: 11.5px; color: var(--muted); }
+.dcard.has-ph { padding-top: 0; overflow: hidden; }
+.dcard .dph { display: block; position: relative; aspect-ratio: 16 / 7; margin: 0 -20px; overflow: hidden; }
+.dcard .dph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s cubic-bezier(.2,.7,.2,1); }
+.dcard:hover .dph img { transform: scale(1.04); }
+
+/* 히어로 사진: 천천히 확대되며 교차 전환 (Ken Burns) */
+.hph { position: absolute; inset: 0; z-index: -2; overflow: hidden; background: #0f2a3d; }
+.hph figure { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity 1.6s ease; }
+.hph figure.on { opacity: 1; }
+.hph img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.02); }
+.hph figure.on img { animation: kb 9s ease-out forwards; }
+.hero.still .hph figure.on img { animation: none; }
+@keyframes kb { from { transform: scale(1.02) translate3d(0,0,0); } to { transform: scale(1.12) translate3d(-1.5%, -1%, 0); } }
+.hero.photo::after { background: linear-gradient(90deg, rgba(6,22,34,.62) 0%, rgba(6,22,34,.36) 45%, rgba(6,22,34,.06) 80%), linear-gradient(0deg, rgba(6,22,34,.45), rgba(6,22,34,0) 40%); }
+.hero.photo h1, .hero.photo p.sub { color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,.35); }
+.hero.photo p.sub { opacity: .94; }
+.hcredit { position: absolute; right: 12px; bottom: 8px; z-index: 1; font-size: 11px; color: rgba(255,255,255,.82); text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+@media (max-width: 720px) { .hero.photo::after { background: linear-gradient(180deg, rgba(6,22,34,.55), rgba(6,22,34,.3) 55%, rgba(6,22,34,.55)); } }
+@media (prefers-reduced-motion: reduce) { .hph figure.on img { animation: none; } }

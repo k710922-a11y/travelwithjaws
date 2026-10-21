@@ -53,7 +53,7 @@ export async function listHub(): Promise<HubRow[]> {
   return data as HubRow[];
 }
 
-export async function getHub(jobNo: string): Promise<{ hub: HubRow | null; cards: Card[] }> {
+export async function getHub(jobNo: string): Promise<{ hub: HubRow | null; cards: Card[]; photo?: { uri: string; credit: string | null } | null }> {
   if (!db) {
     const hub = demoHub.find((h) => h.job_no === jobNo) ?? null;
     return { hub, cards: hub ? demoCards.filter((c) => c.version_id === hub.version_id) : [] };
@@ -61,9 +61,12 @@ export async function getHub(jobNo: string): Promise<{ hub: HubRow | null; cards
   const { data: hub, error } = await db.from("public_hub").select("*").eq("job_no", jobNo).maybeSingle();
   if (error) throw error;
   if (!hub) return { hub: null, cards: [] };
-  const { data: cards, error: e2 } = await db.from("public_cards").select("*").eq("version_id", hub.version_id);
+  const [{ data: cards, error: e2 }, { data: ph }] = await Promise.all([
+    db.from("public_cards").select("*").eq("version_id", hub.version_id),
+    db.from("public_hub_photo").select("uri, credit").eq("job_no", jobNo).maybeSingle(),
+  ]);
   if (e2) throw e2;
-  return { hub: hub as HubRow, cards: (cards ?? []) as Card[] };
+  return { hub: hub as HubRow, cards: (cards ?? []) as Card[], photo: (ph as any) ?? null };
 }
 
 export function sourceLink(c: Card): string | null {

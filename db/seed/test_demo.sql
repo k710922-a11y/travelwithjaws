@@ -41,10 +41,28 @@ do $$ declare a int; b int; c int; begin
   select count(*) into a from trip.public_hub;
   select count(*) into b from trip.public_feed;
   select count(*) into c from trip.public_cards;
+  perform 1 from trip.public_hero; perform 1 from trip.public_hub_photo;
   reset role;
   if a >= 4 and b >= 30 and c >= 10 then raise notice 'OK    익명 사용자로 공개 뷰 읽기 (문서 %·피드 %·카드 %)', a, b, c;
   else raise notice 'FAIL  익명 읽기 결과 % / % / %', a, b, c; end if;
 exception when others then raise notice 'FAIL  익명 사용자 공개 뷰 읽기 → %', sqlerrm;
+end $$;
+
+-- 실제 사진: 예시 피드·판단 문서 모두 승인된 사진 + 크레딧
+do $$ declare n int; d int; c int; begin
+  select count(*) filter (where thumbnail_uri like 'https://images.unsplash.com/%' and platform <> 'hub_doc'),
+         count(*) filter (where thumbnail_uri is not null and platform = 'hub_doc'),
+         count(*) filter (where thumbnail_uri is not null and thumbnail_credit like 'Photo: %')
+    into n, d, c from trip.public_feed where is_demo;
+  if n >= 29 and d = 4 and c = n + d then raise notice 'OK    예시 카드 사진 %장·판단 문서 사진 %장, 모두 크레딧 표시', n, d;
+  else raise notice 'FAIL  사진 피드 % / 문서 % / 크레딧 %', n, d, c; end if;
+end $$;
+do $$ declare aid uuid; s text; begin
+  select i.thumbnail_asset into aid from trip.media_items i join trip.media_sources s on s.id = i.source_id
+   where s.is_demo and i.thumbnail_asset is not null limit 1;
+  update trip.assets set rights_status = 'revoked' where trip.assets.id = aid;
+  select i.thumbnail_asset::text into s from trip.media_items i where i.thumbnail_asset = aid;
+  if s is null then raise notice 'OK    사진 권리 철회 → 카드에서 사진만 내려감 (일러스트로 대체)'; else raise notice 'FAIL  철회된 사진이 카드에 남음'; end if;
 end $$;
 
 -- 두 번 넣어도 같은 결과
@@ -62,6 +80,7 @@ do $$ declare r record; n int; begin
     select 1 from trip.places where is_demo union all select 1 from trip.media_sources where is_demo
     union all select 1 from trip.collections where is_demo union all select 1 from trip.staff where is_demo
     union all select 1 from trip.public_feed where is_demo) x;
+  select n + count(*) into n from trip.assets where note = 'demo-photo';
   if n = 0 then raise notice 'OK    예시 데이터 모두 삭제'; else raise notice 'FAIL  예시 %건 남음', n; end if;
   select b.* into r from before_real b;
   if r.places = (select count(*) from trip.places) and r.staff = (select count(*) from trip.staff)

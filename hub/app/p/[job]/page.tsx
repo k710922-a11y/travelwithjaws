@@ -25,7 +25,7 @@ const SECTIONS: { kind: Card["claim_kind"]; title: string; hint: string; color: 
 
 export default async function HubPage({ params }: Props) {
   const { job } = await params;
-  const { hub, cards } = await getHub(job);
+  const { hub, cards, photo } = await getHub(job);
   if (!hub) notFound();
 
   const byClaim = new Map<string, Card[]>();
@@ -42,6 +42,13 @@ export default async function HubPage({ params }: Props) {
         <span>마지막 확인 {checked}</span>
         <span>· {hub.job_no}</span>
       </p>
+      {photo && (
+        <figure className="docph">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={`${photo.uri}&w=1200`} srcSet={`${photo.uri}&w=1200 1x, ${photo.uri}&w=2000 2x`} alt="" />
+          {photo.credit && <figcaption>사진: {photo.credit.replace(/^Photo: /, "")} · 참고용 사진</figcaption>}
+        </figure>
+      )}
       <h1>{hub.question}</h1>
       <p className="place">
         <b>{hub.official_name}</b>

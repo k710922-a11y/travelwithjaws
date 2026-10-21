@@ -5,7 +5,7 @@ export type FeedItem = {
   id: string; platform: string; creator: string; title: string; published: string; duration: string;
   place: string; region: string; theme: string; segment: string; seaCity: number; with: string[];
   summary: string | null; summaryReason?: string | null; evidence: "official" | "review" | "none";
-  sponsored: boolean; disclosure?: string | null; url: string; job?: string | null; ledger?: number[]; demo?: boolean;
+  sponsored: boolean; disclosure?: string | null; url: string; job?: string | null; ledger?: number[]; demo?: boolean; thumb?: string | null; credit?: string | null;
 };
 export type Collection = { id: string; title: string; sub: string; mood: "sea" | "mix" | "city"; items: string[] };
 export type PortalData = { items: FeedItem[]; collections: Collection[]; themes: { key: string; label: string; segment: string }[] };
@@ -35,10 +35,20 @@ export async function getPortalData(): Promise<PortalData> {
     duration: f.duration_label ?? "", place: f.place_label ?? "", region: f.region ?? "", theme: f.theme, segment: f.segment,
     seaCity: f.sea_city ?? 0, with: f.companions ?? [], summary: f.summary, summaryReason: f.summary_reason,
     evidence: f.evidence, sponsored: f.sponsored, disclosure: f.disclosure, url: f.url, job: f.job_no,
-    ledger: f.platform === "hub_doc" ? ledger.get(f.id) : undefined, demo: !!f.is_demo,
+    ledger: f.platform === "hub_doc" ? ledger.get(f.id) : undefined, demo: !!f.is_demo, thumb: f.thumbnail_uri ?? null, credit: f.thumbnail_credit ?? null,
   }));
   const collections: Collection[] = (cols ?? []).map((c: any) => ({ id: c.slug, title: c.title, sub: c.subtitle ?? "", mood: c.mood, items: c.item_ids }));
   return { items, collections, themes: (demo as any).themes };
+}
+
+// 히어로 사진: 권리 승인된 사진만 (public_hero). 없거나 DB 미연결이면 빈 목록 → 캔버스 장면
+export type HeroPhoto = { uri: string; credit: string | null };
+export async function heroPhotos(): Promise<HeroPhoto[]> {
+  if (!url || !key) return [];
+  const db = createClient(url, key, { db: { schema: "trip" }, auth: { persistSession: false } });
+  const { data, error } = await db.from("public_hero").select("uri, credit").order("hero_order");
+  if (error) return [];
+  return (data ?? []) as HeroPhoto[];
 }
 
 // 히어로 영상: 권리 승인된 자산의 공개 주소만 넣는다 (없으면 캔버스 장면)
